@@ -16,6 +16,7 @@ public class ifPractice extends OpMode {
         double motorSpeed = 10;
         boolean aButton = gamepad1.a;
 
+
         if (leftY < 0.1 && leftY > -0.1) {
             telemetry.addData("Left Stick", "In Dead Zone");
         }
