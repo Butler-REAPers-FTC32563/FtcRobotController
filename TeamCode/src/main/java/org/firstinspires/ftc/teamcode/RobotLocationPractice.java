@@ -4,7 +4,9 @@ public class RobotLocationPractice {
 
     double angle;
 
-    double getAngle
+    public double getAngle() {
+        return this.angle;
+    }
 
     // constructor method
     public RobotLocationPractice(double angle) {
