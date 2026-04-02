@@ -22,6 +22,7 @@ public class UseRobotLocationOpMode extends OpMode {
             robotLocationPractice.turnRobot(-0.1);
 
         }
+        telemetry.addData("getAngle", robotLocationPractice.getAngle;
 
         telemetry.addData("Heading", robotLocationPractice.getHeading());
     }

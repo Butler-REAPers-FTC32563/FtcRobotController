@@ -4,6 +4,8 @@ public class RobotLocationPractice {
 
     double angle;
 
+    double getAngle
+
     // constructor method
     public RobotLocationPractice(double angle) {
         this.angle = angle;
