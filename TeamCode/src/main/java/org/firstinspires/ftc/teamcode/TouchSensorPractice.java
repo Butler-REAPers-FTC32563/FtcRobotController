@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
+
 @TeleOp
 public class TouchSensorPractice extends OpMode {
 
@@ -20,14 +21,13 @@ public class TouchSensorPractice extends OpMode {
 
     @Override
     public void loop() {
-        if (bench.isTouchSensorPressed()){
+        if (bench.isTouchSensorPressed()) {
             telemetry.addData("Touch Sensor State", "Pressed!");
+        } else {
+            telemetry.addData("Touch Sensor State", "Not Pressed!");
         }
-            else {
-                telemetry.addData("Touch Sensor State", "Not Pressed!");
-            }
+        telemetry.update();
     }
 
-    
-}
 
+}
