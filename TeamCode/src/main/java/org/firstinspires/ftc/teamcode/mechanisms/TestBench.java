@@ -48,9 +48,12 @@ public class TestBench {
         return motor.getCurrentPosition() / ticksPerRev; // normalizing ticks to revolutions
     }
 
-    public void setMotorBehavior(DcMotor.ZeroPowerBehavior motorBehavior) {
-        motor.setDirection(motorBehavior);
+    public void setMotorBehavior(DcMotor.ZeroPowerBehavior zeroBehaviors) {
+        motor.setZeroPowerBehavior(zeroBehaviors);
     }
+
+
+
 
 }
 
