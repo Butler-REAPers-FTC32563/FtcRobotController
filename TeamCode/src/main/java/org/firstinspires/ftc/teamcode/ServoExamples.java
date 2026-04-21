@@ -9,24 +9,19 @@ import org.firstinspires.ftc.teamcode.mechanisms.TestBenchServo;
 public class ServoExamples extends OpMode {
     TestBenchServo bench = new TestBenchServo();
 
+    double leftTrigger, rightTrigger;
 
     public void init() {
         bench.init(hardwareMap);
+       leftTrigger = 0;
+       rightTrigger = 0;
     }
 
     public void loop() {
-        if (gamepad1.a) {
-            bench.setServoPos(-1.0);
-        }
-        else {
-            bench.setServoPos(1.0);
-        }
+        leftTrigger = gamepad1.left_trigger;
+        rightTrigger = gamepad1.right_trigger;
 
-        if (gamepad1.b) {
-            bench.setServoRot(1.0);
-        }
-        else {
-            bench.setServoRot(0);
-        }
+        bench.setServoPos(leftTrigger);
+        bench.setServoRot(rightTrigger);
     }
 }
