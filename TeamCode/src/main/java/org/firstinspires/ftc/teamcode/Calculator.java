@@ -31,6 +31,9 @@ public class Calculator extends OpMode {
         if (aButton) {
             result = number1 + number2;
             telemetry.addData("result", result);
+        } else if (gamepad1.x) {
+            result = number1 * number2;
+            telemetry.addData("result", result);
         } else if (bButton) {
             number1 = 0;
             number2 = 0;
