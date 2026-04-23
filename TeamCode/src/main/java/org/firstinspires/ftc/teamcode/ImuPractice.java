@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.mechanisms.TestBenchIMU;
+import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 
 @TeleOp
 public class ImuPractice extends OpMode {
-    TestBenchIMU bench = new TestBenchIMU();
+    TestBench bench = new TestBench();
     private DcMotor motor;
 
     @Override
