@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-public class MecanumDrive {
+public class MecanumRobotDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
 
@@ -18,8 +18,7 @@ public class MecanumDrive {
      frontRightMotor = hwMap.get(DcMotor.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotor.class, "back_right_motor");
 
-
-
+     backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -29,8 +28,8 @@ public class MecanumDrive {
      imu = hwMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot RevOrientation = new RevHubOrientationOnRobot(
-        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+        RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+        RevHubOrientationOnRobot.UsbFacingDirection.UP);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
     }
@@ -56,6 +55,19 @@ public class MecanumDrive {
 
     }
 
+    public void driveFieldRelative(double forward, double strafe, double rotate) {
+        double theta = Math.atan2(forward, strafe);
+        double r = Math.hypot(strafe, forward);
+
+        theta = AngleUnit.normalizeRadians(theta -
+                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
+
+        double newForward = r * Math.sin(theta);
+        double newStrafe = r * Math.cos(theta);
+
+        this.drive(newForward, newStrafe, rotate);
+
+    }
 
 
 }

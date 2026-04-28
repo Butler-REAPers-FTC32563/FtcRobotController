@@ -3,13 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 
 @TeleOp
 public class MecanumRobotOrientedOpMode extends OpMode {
     TestBench bench = new TestBench();
-    MecanumDrive drive = new MecanumDrive();
+    MecanumRobotDrive drive = new MecanumRobotDrive();
 
     double forward, strafe, rotate;
 
