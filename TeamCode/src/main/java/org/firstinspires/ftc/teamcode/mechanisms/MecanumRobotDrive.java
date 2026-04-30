@@ -11,6 +11,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class MecanumRobotDrive {
     private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
+    private DcMotor motor; //linear slide motor 0
+    private double ticksPerRevFL; //revolution\
+    private double ticksPerRevFR; //revolution
+    private double ticksPerRevBL; //revolution
+    private double ticksPerRevBR; //revolution
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotor.class, "front_left_motor");
@@ -32,6 +37,12 @@ public class MecanumRobotDrive {
         RevHubOrientationOnRobot.UsbFacingDirection.UP);
 
         imu.initialize(new IMU.Parameters(RevOrientation));
+
+        // Dc motor
+        ticksPerRevFL = frontLeftMotor.getMotorType().getTicksPerRev();
+        ticksPerRevFR = frontRightMotor.getMotorType().getTicksPerRev();
+        ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
+        ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
 
     public void drive(double forward, double strafe, double rotate) {
@@ -68,6 +79,20 @@ public class MecanumRobotDrive {
         this.drive(newForward, newStrafe, rotate);
 
     }
+    // normalizing ticks to revolutions
+    public double frontLeftMotor() {
+        return frontLeftMotor.getCurrentPosition() / ticksPerRevFL;
+    }
 
+    public double frontRightMotor() {
+        return frontRightMotor.getCurrentPosition() / ticksPerRevFR;
+    }
 
-}
+    public double backLeftMotor() {
+        return backLeftMotor.getCurrentPosition() / ticksPerRevBL;
+    }
+
+    public double backRightMotor() {
+        return backRightMotor.getCurrentPosition() / ticksPerRevBR;
+    }
+    }

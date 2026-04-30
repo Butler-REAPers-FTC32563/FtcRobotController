@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
@@ -29,6 +30,10 @@ public class MecanumFieldOrientatedOpMode extends OpMode {
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
         telemetry.addData("Rotate", rotate);
+        telemetry.addData("FrontLeft", drive.frontLeftMotor());
+        telemetry.addData("FrontRight", drive.frontRightMotor());
+        telemetry.addData("BackLeft", drive.backLeftMotor());
+        telemetry.addData("BackRight", drive.backRightMotor());
 
         telemetry.update();
     }
