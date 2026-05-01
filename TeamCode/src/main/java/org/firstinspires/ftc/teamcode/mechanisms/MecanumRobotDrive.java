@@ -3,13 +3,14 @@ import static java.lang.Math.abs;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
-    private DcMotor frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
+    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL; //revolution\
@@ -18,10 +19,10 @@ public class MecanumRobotDrive {
     private double ticksPerRevBR; //revolution
 
     public void init(HardwareMap hwMap) {
-     frontLeftMotor = hwMap.get(DcMotor.class, "front_left_motor");
-     backLeftMotor = hwMap.get(DcMotor.class, "back_left_motor");
-     frontRightMotor = hwMap.get(DcMotor.class, "front_right_motor");
-     backRightMotor = hwMap.get(DcMotor.class, "back_right_motor");
+     frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
+     backLeftMotor = hwMap.get(DcMotorEx.class, "back_left_motor");
+     frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
+     backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -95,4 +96,21 @@ public class MecanumRobotDrive {
     public double backRightMotor() {
         return backRightMotor.getCurrentPosition() / ticksPerRevBR;
     }
+
+    // RPM calculations
+    public double frontLeftRPM() {
+        return (frontLeftMotor.getVelocity() / ticksPerRevFL) * 60;
     }
+
+    public double frontRightRPM() {
+        return (frontRightMotor.getVelocity() / ticksPerRevFR) * 60;
+    }
+
+    public double backLeftRPM() {
+        return (backLeftMotor.getVelocity() / ticksPerRevBL) * 60;
+    }
+
+    public double backRightRPM() {
+        return (backRightMotor.getVelocity() / ticksPerRevBR) * 60;
+    }
+}

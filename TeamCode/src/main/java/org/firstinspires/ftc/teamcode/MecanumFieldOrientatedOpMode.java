@@ -30,10 +30,10 @@ public class MecanumFieldOrientatedOpMode extends OpMode {
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
         telemetry.addData("Rotate", rotate);
-        telemetry.addData("FrontLeft", drive.frontLeftMotor());
-        telemetry.addData("FrontRight", drive.frontRightMotor());
-        telemetry.addData("BackLeft", drive.backLeftMotor());
-        telemetry.addData("BackRight", drive.backRightMotor());
+        telemetry.addData("FrontLeft RPM", drive.frontLeftRPM());
+        telemetry.addData("FrontRight RPM", drive.frontRightRPM());
+        telemetry.addData("BackLeft RPM", drive.backLeftRPM());
+        telemetry.addData("BackRight RPM", drive.backRightRPM());
 
         telemetry.update();
     }
