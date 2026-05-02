@@ -17,6 +17,10 @@ public class MecanumRobotDrive {
     private double ticksPerRevFR; //revolution
     private double ticksPerRevBL; //revolution
     private double ticksPerRevBR; //revolution
+    double ticksPerRev = 537.7;
+    double targetRpm = 300;
+    double targetTicksPerSecond = targetRpm * ticksPerRev /60;
+
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
