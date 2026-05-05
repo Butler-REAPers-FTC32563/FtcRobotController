@@ -13,13 +13,10 @@ public class MecanumRobotDrive {
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
-    private double ticksPerRevFL; //revolution\
-    private double ticksPerRevFR; //revolution
-    private double ticksPerRevBL; //revolution
-    private double ticksPerRevBR; //revolution
-    double ticksPerRev = 537.7;
-    double targetRpm = 300;
-    double targetTicksPerSecond = targetRpm * ticksPerRev /60;
+    private double ticksPerRevFL;
+    private double ticksPerRevFR;
+    private double ticksPerRevBL;
+    private double ticksPerRevBR;
 
 
     public void init(HardwareMap hwMap) {
@@ -57,17 +54,36 @@ public class MecanumRobotDrive {
         double backRightPower = forward + strafe - rotate;
 
         double maxPower = 1.0;
-        double maxSpeed = 1.0;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
         maxPower = Math.max(maxPower, Math.abs(frontRightPower));
         maxPower = Math.max(maxPower, Math.abs(backRightPower));
 
-        frontLeftMotor.setPower(maxSpeed * (frontLeftPower / maxPower));
-        backLeftMotor.setPower(maxSpeed * (backLeftPower / maxPower));
-        frontRightMotor.setPower(maxSpeed * (frontRightPower / maxPower));
-        backRightMotor.setPower(maxSpeed * (backRightPower / maxPower));
+        // Normalize power values
+        frontLeftPower = frontLeftPower / maxPower;
+        backLeftPower = backLeftPower / maxPower;
+        frontRightPower = frontRightPower / maxPower;
+        backRightPower = backRightPower / maxPower;
+
+        // Convert normalized power to target RPM (max 312 RPM for these motors)
+        double maxRPM = 312;
+        double frontLeftTargetRPM = frontLeftPower * maxRPM;
+        double backLeftTargetRPM = backLeftPower * maxRPM;
+        double frontRightTargetRPM = frontRightPower * maxRPM;
+        double backRightTargetRPM = backRightPower * maxRPM;
+
+        // Convert RPM to ticks per second (velocity)
+        double frontLeftVelocity = (frontLeftTargetRPM * ticksPerRevFL) / 60.0;
+        double backLeftVelocity = (backLeftTargetRPM * ticksPerRevBL) / 60.0;
+        double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
+        double backRightVelocity = (backRightTargetRPM * ticksPerRevBR) / 60.0;
+
+        // Set velocity for each motor (automatic closed-loop control)
+        frontLeftMotor.setVelocity(frontLeftVelocity);
+        backLeftMotor.setVelocity(backLeftVelocity);
+        frontRightMotor.setVelocity(frontRightVelocity);
+        backRightMotor.setVelocity(backRightVelocity);
 
     }
 
