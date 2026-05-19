@@ -1,3 +1,6 @@
+//TODO
+// Add a deadzone since controls are very sensitve
+
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -19,8 +22,7 @@ public class ArcadeTankDrive {
        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-       frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-       backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+       backRightMotor.setDirection(DcMotor.Direction.REVERSE);
    }
 
    public void drive(double throttle, double spin) {
