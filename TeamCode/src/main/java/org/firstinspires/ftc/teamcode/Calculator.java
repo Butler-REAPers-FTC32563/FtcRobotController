@@ -34,7 +34,15 @@ public class Calculator extends OpMode {
         } else if (gamepad1.x) {
             result = number1 * number2;
             telemetry.addData("result", result);
-        } else if (bButton) {
+        } else if (gamepad1.y) {
+            result = number1 / number2
+            telemetry.addData("result", result);
+        }else if (gamepad1.b) {
+            result = number1 - number2
+            telemetry.addData("result", result)
+        }
+        
+        else if (gamepad1.isTouchSensorPressed) {
             number1 = 0;
             number2 = 0;
             result = 0;
