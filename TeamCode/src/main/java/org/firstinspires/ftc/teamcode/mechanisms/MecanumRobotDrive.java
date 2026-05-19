@@ -66,20 +66,20 @@ public class MecanumRobotDrive {
         frontRightPower = frontRightPower / maxPower;
         backRightPower = backRightPower / maxPower;
 
-        // Convert normalized power to target RPM (max 312 RPM for these motors)
+        //normalize power to target RPM 
         double maxRPM = 312;
         double frontLeftTargetRPM = frontLeftPower * maxRPM;
         double backLeftTargetRPM = backLeftPower * maxRPM;
         double frontRightTargetRPM = frontRightPower * maxRPM;
         double backRightTargetRPM = backRightPower * maxRPM;
 
-        // Convert RPM to ticks per second (velocity)
+        // Convert RPM to tps with velocity
         double frontLeftVelocity = (frontLeftTargetRPM * ticksPerRevFL) / 60.0;
         double backLeftVelocity = (backLeftTargetRPM * ticksPerRevBL) / 60.0;
         double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
         double backRightVelocity = (backRightTargetRPM * ticksPerRevBR) / 60.0;
 
-        // Set velocity for each motor (automatic closed-loop control)
+        // Set velocity 
         frontLeftMotor.setVelocity(frontLeftVelocity);
         backLeftMotor.setVelocity(backLeftVelocity);
         frontRightMotor.setVelocity(frontRightVelocity);
