@@ -39,7 +39,7 @@ apply plugin: 'dev.frozenmilk.sinister.sloth.load'\
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
 
-        compileSdk 35
+    compileSdk 34
     defaultConfig {
         minSdk 24
     }
@@ -47,6 +47,7 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
+    
 }
 
 repositories {
@@ -58,10 +59,13 @@ repositories {
     maven {
         url = "https://repo.dairy.foundation/snapshots"
     }
+    maven { 
+        url = "https://mymaven.bylazar.com/releases" 
+    }
 }
 
 dependencies {
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
     implementation project(':FtcRobotController')
-
+    implementation "com.bylazar:fullpanels:1.0.12"
 }
