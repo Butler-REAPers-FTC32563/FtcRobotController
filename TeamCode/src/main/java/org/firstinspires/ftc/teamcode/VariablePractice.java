@@ -25,5 +25,6 @@ public class VariablePractice extends OpMode {
     @Override
     public void loop() {
 
+        return 0;
     }
 }

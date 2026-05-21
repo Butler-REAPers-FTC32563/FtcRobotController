@@ -18,11 +18,13 @@ public class ArcadeDriveOpMode extends OpMode {
     }
 
     @Override
-    public void loop(){
-    throttle = -gamepad1.left_stick_y;
-    spin = gamepad1.left_stick_x;
+    public void loop() {
+        throttle = -gamepad1.left_stick_y;
+        spin = gamepad1.left_stick_x;
 
-    drive.drive(throttle, spin);
+        drive.drive(throttle, spin);
+        return 0;
 
+    }
     }
 }

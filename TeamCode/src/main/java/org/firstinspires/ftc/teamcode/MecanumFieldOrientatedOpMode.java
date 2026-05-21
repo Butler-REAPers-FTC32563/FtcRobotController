@@ -36,5 +36,6 @@ public class MecanumFieldOrientatedOpMode extends OpMode {
         telemetry.addData("BackRight RPM", drive.backRightRPM());
 
         telemetry.update();
+        return 0;
     }
 }

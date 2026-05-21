@@ -27,6 +27,7 @@ public class TouchSensorPractice extends OpMode {
             telemetry.addData("Touch Sensor State", "Not Pressed!");
         }
         telemetry.update();
+        return 0;
     }
 
 

@@ -23,5 +23,6 @@ public class ServoExamples extends OpMode {
 
         bench.setServoPos(leftTrigger);
         bench.setServoRot(rightTrigger);
+        return 0;
     }
 }

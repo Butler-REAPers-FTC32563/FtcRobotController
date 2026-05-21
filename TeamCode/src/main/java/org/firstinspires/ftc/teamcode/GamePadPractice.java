@@ -30,5 +30,6 @@ public class GamePadPractice extends OpMode {
 
         telemetry.addData("difference x", xDifference);
         telemetry.addData("trigger total", triggerTotal);
+        return speedForward;
     }
 }

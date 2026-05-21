@@ -27,6 +27,7 @@ public class ifPractice extends OpMode {
 
         telemetry.addData("Left Stick Value", leftY);
         telemetry.addData("motor speed", motorSpeed);
+        return leftY;
     }
 }
 

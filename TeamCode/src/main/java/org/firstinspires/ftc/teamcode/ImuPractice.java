@@ -31,5 +31,6 @@ public class ImuPractice extends OpMode {
             
         }
         telemetry.update();
+        return heading;
     }
 }

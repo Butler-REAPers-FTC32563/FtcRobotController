@@ -47,5 +47,6 @@ public class Calculator extends OpMode {
             number2 = 0;
             result = 0;
         }
+        return 0;
     }
 }

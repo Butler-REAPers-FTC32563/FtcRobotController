@@ -32,6 +32,7 @@ public class DcMotorPractice extends OpMode {
 
         }
 
+        return motorSpeed;
     }
 
 }

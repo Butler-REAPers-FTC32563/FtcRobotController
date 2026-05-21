@@ -17,6 +17,7 @@ public class RumbleTest extends OpMode {
        if (gamepad1.a) {
            gamepad1.rumble(500); // 500ms rumble
        }
+        return 0;
     }
 
 
