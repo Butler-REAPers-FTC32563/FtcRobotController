@@ -33,7 +33,8 @@ public class LimeLightTest extends OpMode {
     @Override
     public void start() {
 
-        limelight3A.start();
+        limelight3A.start();  //To make your Limelight 3A ignore far-away items and only focus on or group close objects, configure your pipeline's contour filtering and area/size thresholds inside the web dashboard. Objects that are close have a larger target area (ta) and specific pixel dimensions compared to distant ones.
+
     }
 
 
@@ -43,12 +44,17 @@ public class LimeLightTest extends OpMode {
         LLResult llResult = limelight3A.getLatestResult();
         if (llResult !=null & llResult.isValid()) { // if results are valid
 
-            if (Math.abs(llResult.getTx()) >= 10) { // if x is not centered rotate
+            if (llResult.getTx() >= 6) { // if x is not centered rotate right
                 forward = 0;
-                rotate = 0.5;
-            } else if (Math.abs(llResult.getTx()) >= 10 & llResult.getTa() <= 80 ) {
+                rotate = 0.025;
+            }
+            else if (llResult.getTx() <= -6) { // rotate left
+                forward = 0;
+                rotate = -0.025;
+
+            } else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) {
                 rotate = 0;
-                forward = .5;
+                forward = .2;
             } else {
                 rotate = 0;
                 forward = 0;
