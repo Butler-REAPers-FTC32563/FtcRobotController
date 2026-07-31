@@ -44,9 +44,15 @@ public class LimeLightTest extends OpMode {
         if (llResult !=null & llResult.isValid()) { // if results are valid
 
             if (Math.abs(llResult.getTx()) >= 10) { // if x is not centered rotate
+                forward = 0;
                 rotate = 0.5;
             } else if (Math.abs(llResult.getTx()) >= 10 & llResult.getTa() <= 80 ) {
+                rotate = 0;
                 forward = .5;
+            } else {
+                rotate = 0;
+                forward = 0;
+                strafe = 0;
             }
 
 
