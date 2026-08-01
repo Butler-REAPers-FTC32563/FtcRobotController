@@ -19,6 +19,7 @@ public class LimeLightTest extends OpMode {
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
     double forward, strafe, rotate;
+    double forwardSpeed, strafeSpeed, rotateSpeed;
 
     public Limelight3A limelight3A;
 
@@ -28,12 +29,17 @@ public class LimeLightTest extends OpMode {
         limelight3A.pipelineSwitch(8); //  pipeline 8 for green ball
 
         drive.init(hardwareMap);
+
+        forwardSpeed = 0.2;
+        strafeSpeed = 0;
+        rotateSpeed = 0.025;
+
     }
 
     @Override
     public void start() {
 
-        limelight3A.start();  //To make your Limelight 3A ignore far-away items and only focus on or group close objects, configure your pipeline's contour filtering and area/size thresholds inside the web dashboard. Objects that are close have a larger target area (ta) and specific pixel dimensions compared to distant ones.
+        limelight3A.start();
 
     }
 
@@ -46,15 +52,15 @@ public class LimeLightTest extends OpMode {
 
             if (llResult.getTx() >= 6) { // if x is not centered rotate right
                 forward = 0;
-                rotate = 0.025;
+                rotate = rotateSpeed;
             }
             else if (llResult.getTx() <= -6) { // rotate left
                 forward = 0;
-                rotate = -0.025;
+                rotate = -rotateSpeed;
 
-            } else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) {
+            } else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) { // when x is centered drive towards the ball
                 rotate = 0;
-                forward = .2;
+                forward = forwardSpeed;
             } else {
                 rotate = 0;
                 forward = 0;
