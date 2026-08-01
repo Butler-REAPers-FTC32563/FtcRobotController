@@ -14,31 +14,29 @@ import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 @Autonomous
 public class LimeLightTest extends OpMode {
 
+    private final double FORWARD_SPEED = 0.2; // default forward drive speed
+    private final double ROTATE_SPEED = 0.025; //default rotation speed both ways
+
     TestBench bench = new TestBench();
-
     MecanumRobotDrive drive = new MecanumRobotDrive();
-
     double forward, strafe, rotate;
-    double forwardSpeed, strafeSpeed, rotateSpeed;
-
     public Limelight3A limelight3A;
+
 
     @Override
     public void init() {
+        // select limelight and pipeline
         limelight3A = hardwareMap.get(Limelight3A.class, "limeLight");
-        limelight3A.pipelineSwitch(8); //  pipeline 8 for green ball
+        limelight3A.pipelineSwitch(8); //  pipeline 8 for green color detection
 
         drive.init(hardwareMap);
 
-        forwardSpeed = 0.2;
-        strafeSpeed = 0;
-        rotateSpeed = 0.025;
 
     }
 
+    // start limelight
     @Override
     public void start() {
-
         limelight3A.start();
 
     }
@@ -47,31 +45,44 @@ public class LimeLightTest extends OpMode {
 
     @Override
     public void loop() {
+
+        // get latest limelight results
         LLResult llResult = limelight3A.getLatestResult();
-        if (llResult !=null & llResult.isValid()) { // if results are valid
 
-            if (llResult.getTx() >= 6) { // if x is not centered rotate right
+        // if ball is found go towards it
+        if (llResult !=null && llResult.isValid()) {
+
+            // if x is not centered rotate counterclockwise
+            if (llResult.getTx() >= 6) {
                 forward = 0;
-                rotate = rotateSpeed;
+                rotate = ROTATE_SPEED;
             }
-            else if (llResult.getTx() <= -6) { // rotate left
+            // rotate counterclockwise
+            else if (llResult.getTx() <= -6) {
                 forward = 0;
-                rotate = -rotateSpeed;
+                rotate = -ROTATE_SPEED;
 
-            } else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) { // when x is centered drive towards the ball
+            }
+            // when x is centered drive towards the ball
+            else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) {
                 rotate = 0;
-                forward = forwardSpeed;
-            } else {
+                forward = FORWARD_SPEED;
+            }
+            // if ball is detected but close enough stop motors
+            else {
                 rotate = 0;
                 forward = 0;
                 strafe = 0;
             }
 
-
+            // if no ball found rotate clockwise to find ball
+            if (llResult =null & llResult.) {
+                rotate = ROTATE_SPEED;
+            }
             drive.drive(forward, strafe, rotate);
 
-            
-
+            //update and add telemetry
+            telemetry.update();
             telemetry.addData("Target X offset", llResult.getTx());
             telemetry.addData("Target Y offset", llResult.getTy());
             telemetry.addData("Target Area offset", llResult.getTa());
