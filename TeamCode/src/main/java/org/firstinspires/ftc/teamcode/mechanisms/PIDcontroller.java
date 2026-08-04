@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 public class PIDcontroller {
 
-    double kp, ki, kd;
+    public double kp, ki, kd;
 
     double integral;
 
@@ -24,7 +24,7 @@ public class PIDcontroller {
 
     public double calculate(double error) {
         long now = System.nanoTime();
-        // now is in nano seconds so covert to seconds for deltra time
+        // now is in nano seconds so covert to seconds for delta time
         double dt = (now - lastTime) / 1_000_000_000,0;
         if dt <= 0) dt = 0.001;
         lastTime = now;
@@ -34,7 +34,7 @@ public class PIDcontroller {
         if (integral > 100) integral = 100;
         if (integral < -100) integral = -100;
 
-        double derivative = (error - lastError) / dt; // measures rate of chnage
+        double derivative = (error - lastError) / dt; // measures rate of change
         lastError = error;
 
         return (kp * error) + (ki * integral) + (kd * derivative);

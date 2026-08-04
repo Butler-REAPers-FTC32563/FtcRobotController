@@ -10,17 +10,26 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
+import org.firstinspires.ftc.teamcode.mechanisms.PIDcontroller;
 
 @Autonomous
 public class LimeLightTest extends OpMode {
 
     private final double FORWARD_SPEED = 0.2; // default forward drive speed
-    private final double ROTATE_SPEED = 0.025; //default rotation speed both ways
 
     TestBench bench = new TestBench();
     MecanumRobotDrive drive = new MecanumRobotDrive();
+
+    PIDcontroller pidController = new PIDcontroller
     double forward, strafe, rotate;
+
+    double kp, ki, kd;
     public Limelight3A limelight3A;
+
+
+
+
+
 
 
     @Override
@@ -48,6 +57,9 @@ public class LimeLightTest extends OpMode {
 
         // get latest limelight results
         LLResult llResult = limelight3A.getLatestResult();
+
+        double ROTATE_SPEED = pidController.calculate(llResult.getTx());
+
 
         // if ball is found go towards it
         if (llResult !=null && llResult.isValid()) {
@@ -80,6 +92,7 @@ public class LimeLightTest extends OpMode {
                 rotate = ROTATE_SPEED;
             }
             drive.drive(forward, strafe, rotate);
+            PIDcontroller(kp, ki, kd);
 
             //update and add telemetry
             telemetry.update();
