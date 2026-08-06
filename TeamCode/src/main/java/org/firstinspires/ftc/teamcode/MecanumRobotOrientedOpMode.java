@@ -25,7 +25,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        drive.drive(forward, strafe, rotate);
+`        drive.drive(forward, strafe, rotate);
 
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
