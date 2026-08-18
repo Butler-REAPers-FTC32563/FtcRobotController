@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.mechanisms.ArcadeTankDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.TankDrive;
 
 @TeleOp
-public class ArcadeDriveOpMode extends OpMode {
+public class TankDriveOpMode extends OpMode {
 
-    ArcadeTankDrive drive = new ArcadeTankDrive();
+    TankDrive drive = new TankDrive();
     double throttle, spin;
 
     @Override

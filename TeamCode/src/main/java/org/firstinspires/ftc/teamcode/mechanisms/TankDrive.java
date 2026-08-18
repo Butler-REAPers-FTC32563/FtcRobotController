@@ -3,12 +3,11 @@
 
 package org.firstinspires.ftc.teamcode.mechanisms;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class ArcadeTankDrive {
+public class TankDrive {
    private DcMotor backLeftMotor, backRightMotor, frontLeftMotor, frontRightMotor;
 
    public void init(HardwareMap hwMap) {
@@ -23,6 +22,7 @@ public class ArcadeTankDrive {
        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
        backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+       frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
    }
 
    public void drive(double throttle, double spin) {
