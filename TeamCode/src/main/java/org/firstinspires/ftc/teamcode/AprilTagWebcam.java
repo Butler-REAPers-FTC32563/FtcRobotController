@@ -62,6 +62,5 @@ public class AprilTagWebcam {
             telemetry.addData( "Camera", "Ready");
             telemetry.update();
     }
-        
 }
 }

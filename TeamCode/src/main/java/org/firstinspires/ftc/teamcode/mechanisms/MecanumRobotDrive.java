@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
-    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor;
+    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL;
@@ -24,6 +24,7 @@ public class MecanumRobotDrive {
      backLeftMotor = hwMap.get(DcMotorEx.class, "back_left_motor");
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
+     intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -47,7 +48,7 @@ public class MecanumRobotDrive {
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
 
-    public void drive(double forward, double strafe, double rotate) {
+    public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
@@ -84,6 +85,7 @@ public class MecanumRobotDrive {
         backLeftMotor.setVelocity(backLeftVelocity);
         frontRightMotor.setVelocity(frontRightVelocity);
         backRightMotor.setVelocity(backRightVelocity);
+        intakeMotor.setPower(intake);
 
     }
 
@@ -97,7 +99,7 @@ public class MecanumRobotDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.drive(newForward, newStrafe, rotate);
+        this.drive(newForward, newStrafe, rotate, 0);
 
     }
     // normalizing ticks to revolutions
