@@ -76,11 +76,10 @@ public class LimeLightTest extends OpMode {
             }
 
             // if no ball found rotate clockwise to find ball
-            if (!llResult.isValid()) {
+            if (llResult == null || !llResult.isValid()) {
                 rotate = ROTATE_SPEED;
-
             }
-            drive.drive(forward, strafe, rotate);
+            drive.drive(forward, strafe, rotate, 0);
 
             //update and add telemetry
             telemetry.update();
