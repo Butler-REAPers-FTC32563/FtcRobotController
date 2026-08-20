@@ -3,17 +3,8 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-
-
-
-
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.mechanisms.TankDrive;
-
 @TeleOp
-public class IDKWHATTOCALLYOUMANOpMode extends OpMode {
+public class ZeroTurnOpMode extends OpMode {
 
     TankDrive drive = new TankDrive();
     double throttleL, throttleR, throttle;
