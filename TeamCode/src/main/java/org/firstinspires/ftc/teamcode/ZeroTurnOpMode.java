@@ -18,7 +18,7 @@ public class ZeroTurnOpMode extends OpMode {
     @Override
     public void loop(){
         throttleL = -gamepad1.left_stick_y * throttle;
-        throttleR = gamepad1.right_stick_x * throttle;
+        throttleR = -gamepad1.right_stick_y * throttle;
 
         drive.drive(throttleL, throttleR);
 

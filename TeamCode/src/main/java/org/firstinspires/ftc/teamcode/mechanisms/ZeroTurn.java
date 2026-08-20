@@ -23,9 +23,9 @@ public class ZeroTurn {
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void drive(double throttle, double spin) {
-        double leftPower = throttle + spin;
-        double rightPower = throttle - spin;
+    public void drive(double throttleL, double throttleR) {
+        double leftPower = throttleL;
+        double rightPower = throttleR;
 
 
 
