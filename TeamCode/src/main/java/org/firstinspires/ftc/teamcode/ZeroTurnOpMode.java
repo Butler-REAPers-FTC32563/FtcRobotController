@@ -12,7 +12,7 @@ public class ZeroTurnOpMode extends OpMode {
     @Override
     public void init()  {
         drive.init(hardwareMap);
-
+        throttle = 1;
     }
 
     @Override
