@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class ZeroTurnOpMode extends OpMode {
 
-    TankDrive drive = new TankDrive();
+    ZeroTurn drive = new ZeroTurn();
     double throttleL, throttleR, throttle;
 
     @Override
@@ -20,7 +20,7 @@ public class ZeroTurnOpMode extends OpMode {
         throttleL = -gamepad1.left_stick_y * throttle;
         throttleR = gamepad1.right_stick_x * throttle;
 
-        drive.drive( throttleL, throttleR);
+        drive.drive(throttleL, throttleR);
 
     }
 }
