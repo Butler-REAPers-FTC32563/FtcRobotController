@@ -12,6 +12,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
     double forward, strafe, rotate, intake;
+    boolean intakeOn;
 
     @Override
     public void init() {
@@ -24,11 +25,18 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         forward = -gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
+
         if(gamepad1.a) {
-            intake = 0.3;
-        } else{
-            intake = 0;
+            if(intakeOn = false) {
+                intakeOn = true;
+            }
+            else if (intakeOn = true) {
+                intakeOn = false;
+
+            }
+
         }
+
 
 
         drive.drive(forward, strafe, rotate, intake);
