@@ -20,7 +20,7 @@ public class TankDriveOpMode extends OpMode {
     @Override
     public void loop(){
     throttle = -gamepad1.left_stick_y;
-    spin = gamepad1.left_stick_x;
+    spin = gamepad1.right_stick_x;
 
     drive.drive(throttle, spin);
 
