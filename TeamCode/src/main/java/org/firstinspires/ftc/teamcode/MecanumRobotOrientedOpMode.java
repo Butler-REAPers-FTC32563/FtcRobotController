@@ -26,7 +26,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        if(gamepad1.a()) {
+        if(gamepad1.a) {
             if(intakeOn == false) {
                 intakeOn = true;
             }
@@ -35,6 +35,12 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
             }
 
+        }
+
+        if(intakeOn == true) {
+            intake = 1;
+        } else {
+            intake = 0;
         }
 
 
@@ -48,7 +54,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("FrontRight RPM", drive.frontRightRPM());
         telemetry.addData("BackLeft RPM", drive.backLeftRPM());
         telemetry.addData("BackRight RPM", drive.backRightRPM());
-
+        telemetry.addData("IntakeOn", intakeOn);
         telemetry.update();
     }
 }
