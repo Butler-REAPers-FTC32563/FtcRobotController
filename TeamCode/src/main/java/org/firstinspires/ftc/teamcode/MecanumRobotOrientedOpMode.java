@@ -26,22 +26,11 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        if(gamepad1.a) {
-            if(intakeOn == false) {
-                intakeOn = true;
-            }
-            else if (intakeOn == true) {
-                intakeOn = false;
-
-            }
-
+        if(gamepad1.aWasReleased()) {
+            intakeOn = !intakeOn;
         }
 
-        if(intakeOn == true) {
-            intake = 1;
-        } else {
-            intake = 0;
-        }
+        intake = intakeOn ? 1 : 0;
 
 
 
