@@ -22,15 +22,17 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     @Override
     public void loop() {
-        forward = -gamepad1.left_stick_y;
-        strafe = gamepad1.left_stick_x;
-        rotate = gamepad1.right_stick_x;
+        //forward = -gamepad1.left_stick_y;
+        //strafe = gamepad1.left_stick_x;
+        //rotate = gamepad1.right_stick_x;
 
         if(gamepad1.aWasReleased()) {
             intakeOn = !intakeOn;
         }
 
         intake = intakeOn ? 1 : 0;
+
+
 
 
 

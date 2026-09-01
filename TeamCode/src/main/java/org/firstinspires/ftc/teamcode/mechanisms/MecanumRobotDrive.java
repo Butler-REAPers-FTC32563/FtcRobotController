@@ -27,6 +27,7 @@ public class MecanumRobotDrive {
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+     intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
