@@ -6,18 +6,20 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
-    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
+    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor, ArmExtendMotor, ArmAngleMotor;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL;
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
-
+    private Servo ClawServo;
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
@@ -25,14 +27,19 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
+     ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
+     ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
+     ClawServo = hwMap.get(Servo.class, "Claw_Servo");
 
-     backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotor.Direction.REVERSE);
      intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
 
      imu = hwMap.get(IMU.class, "imu");
 

@@ -47,5 +47,14 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("BackRight RPM", drive.backRightRPM());
         telemetry.addData("IntakeOn", intakeOn);
         telemetry.update();
+
+        if (gamepad1.dpad_up) {
+            bench.setServoPos(0);
+        }
+        else {
+            bench.setServoPos(1.0);
+        }
     }
 }
+
+
