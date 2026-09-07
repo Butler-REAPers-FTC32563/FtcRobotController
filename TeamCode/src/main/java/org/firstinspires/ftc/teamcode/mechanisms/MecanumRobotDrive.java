@@ -75,7 +75,7 @@ public class MecanumRobotDrive {
         double frontRightTargetRPM = frontRightPower * maxRPM;
         double backRightTargetRPM = backRightPower * maxRPM;
 
-        // Convert RPM to tps with velocity
+        // Convert RPM to tps +with velocity
         double frontLeftVelocity = (frontLeftTargetRPM * ticksPerRevFL) / 60.0;
         double backLeftVelocity = (backLeftTargetRPM * ticksPerRevBL) / 60.0;
         double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
