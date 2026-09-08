@@ -21,6 +21,5 @@ public class ZeroTurnOpMode extends OpMode {
         throttleR = -gamepad1.right_stick_y * throttle;
 
         drive.drive(throttleL, throttleR);
-
     }
 }
