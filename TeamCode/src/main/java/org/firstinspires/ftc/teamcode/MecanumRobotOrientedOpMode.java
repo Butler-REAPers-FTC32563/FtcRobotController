@@ -10,13 +10,17 @@ import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 public class MecanumRobotOrientedOpMode extends OpMode {
     TestBench bench = new TestBench();
     MecanumRobotDrive drive = new MecanumRobotDrive();
+<<<<<<< Updated upstream
+=======
 
-    double forward, strafe, rotate, intake;
+>>>>>>> Stashed changes
+
+    double forward, strafe, rotate, intake, ClawOpen;
     boolean intakeOn;
 
     @Override
     public void init() {
-
+        bench.init(hardwareMap);
         drive.init(hardwareMap);
     }
 
@@ -26,11 +30,24 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         //strafe = gamepad1.left_stick_x;
         //rotate = gamepad1.right_stick_x;
 
+        if (gamepad1.dpad_up) {
+            bench.setServoRot(1.0);
+        }
+        else {
+            bench.setServoRot(0);
+        }
+        if (gamepad1.dpad_down) {
+            bench.setServoRot(-1.0);
+        }
+        else {
+            bench.setServoRot(0);
+        }
         if(gamepad1.aWasReleased()) {
             intakeOn = !intakeOn;
         }
 
         intake = intakeOn ? 1 : 0;
+
 
 
 
