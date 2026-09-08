@@ -8,10 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-<<<<<<< Updated upstream
-import com.qualcomm.robotcore.hardware.CRServo;
-=======
->>>>>>> Stashed changes
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -23,8 +19,8 @@ public class MecanumRobotDrive {
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
-<<<<<<< Updated upstream
     private Servo ClawServo;
+    private CRServo ConServo;
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
@@ -35,24 +31,7 @@ public class MecanumRobotDrive {
      ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
      ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
      ClawServo = hwMap.get(Servo.class, "Claw_Servo");
-=======
-    private CRServo ConServo;
-
-
-    public void init(HardwareMap hwMap) {
-        frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
-        backLeftMotor = hwMap.get(DcMotorEx.class, "back_left_motor");
-        frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
-        backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
-        intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
-        ConServo = hwMap.get(CRServo.class, "ConServo");
-
-
-        public void setConServo(double power)
-        ConServo.setPower(power);
-
-
->>>>>>> Stashed changes
+     ConServo = hwMap.get(CRServo.class, "ConServo");
 
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
      intakeMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -81,7 +60,11 @@ public class MecanumRobotDrive {
 
     }
 
-    public void drive(double forward, double strafe, double rotate, double intake, double ClawAngle) {
+    public void setConServo(double power) {
+        ConServo.setPower(power);
+    }
+
+    public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;

@@ -10,10 +10,6 @@ import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 public class MecanumRobotOrientedOpMode extends OpMode {
     TestBench bench = new TestBench();
     MecanumRobotDrive drive = new MecanumRobotDrive();
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
     double forward, strafe, rotate, intake, ClawOpen;
     boolean intakeOn;
