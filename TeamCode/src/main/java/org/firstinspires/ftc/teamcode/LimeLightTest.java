@@ -52,6 +52,8 @@ public class LimeLightTest extends OpMode {
         // if ball is found go towards it
         if (llResult !=null && llResult.isValid()) {
 
+            
+
             // if x is not centered rotate counterclockwise
             if (llResult.getTx() >= 6) {
                 forward = 0;

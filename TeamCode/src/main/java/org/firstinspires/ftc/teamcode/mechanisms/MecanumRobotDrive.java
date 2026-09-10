@@ -64,6 +64,10 @@ public class MecanumRobotDrive {
         ConServo.setPower(power);
     }
 
+    public void setClawPos(double position) {
+        ClawServo.setPosition(position);
+    }
+
     public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
