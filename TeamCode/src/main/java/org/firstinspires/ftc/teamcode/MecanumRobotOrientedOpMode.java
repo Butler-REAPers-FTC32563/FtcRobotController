@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
 @TeleOp
 public class MecanumRobotOrientedOpMode extends OpMode {
     TestBench bench = new TestBench();
-    MecanumRobotDrive drive = new MecanumRobotDrive();ZZ3
+    MecanumRobotDrive drive = new MecanumRobotDrive();
 
 
     double forward, strafe, rotate, intake, ClawOpen;
@@ -43,11 +43,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             intakeOn = !intakeOn;
         }
 
+
         intake = intakeOn ? 1 : 0;
-
-
-
-
 
 
         drive.drive(forward, strafe, rotate, intake);
@@ -66,7 +63,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             bench.setServoPos(0);
         }
         else {
-            bench.setServoPos(1.0);
+            bench.setServoPos(1);
         }
     }
 }

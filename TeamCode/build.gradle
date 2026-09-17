@@ -16,9 +16,13 @@ apply plugin: 'com.android.application'
 
 buildscript {
     repositories {
+        google()
         mavenCentral()
         maven {
             url "https://repo.dairy.foundation/releases"
+        }
+        maven {
+            url "https://repo.dairy.foundation/snapshots"
         }
         maven {
             url = "https://mymaven.bylazar.com/releases"
@@ -26,14 +30,14 @@ buildscript {
 
     }
     dependencies {
-        classpath "dev.frozenmilk:Load:0.2.4"
+        classpath "dev.frozenmilk:Load:SNAPSHOT-5b56925"
 
     }
 }
 
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
-apply plugin: 'dev.frozenmilk.sinister.sloth.load'\
+apply plugin: 'dev.frozenmilk.sinister.sloth.load'
 
 
 
@@ -69,7 +73,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+    implementation("dev.frozenmilk.sinister:Sloth:SNAPSHOT-5b56925")
     implementation project(':FtcRobotController')
     implementation "com.bylazar:fullpanels:1.0.12"
 }
