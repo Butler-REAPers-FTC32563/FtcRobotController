@@ -5,11 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
-import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
-
 @TeleOp
 public class MecanumFieldOrientatedOpMode extends OpMode {
-    TestBench bench = new TestBench();
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
     double forward, strafe, rotate;

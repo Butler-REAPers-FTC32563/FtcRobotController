@@ -2,12 +2,10 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import static java.lang.Math.abs;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -19,8 +17,7 @@ public class MecanumRobotDrive {
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
-    private Servo ClawServo;
-    private CRServo ConServo;
+
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
@@ -28,13 +25,9 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
-     ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
-     ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
-     ClawServo = hwMap.get(Servo.class, "Claw_Servo");
-     ConServo = hwMap.get(CRServo.class, "ConServo");
 
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
-     intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -60,9 +53,7 @@ public class MecanumRobotDrive {
 
     }
 
-    public void setConServo(double power) {
-        ConServo.setPower(power);
-    }
+
 
     public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;

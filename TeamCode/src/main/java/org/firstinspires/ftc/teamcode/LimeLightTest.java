@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
-import org.firstinspires.ftc.teamcode.mechanisms.TestBench;
+
 
 @Autonomous
 public class LimeLightTest extends OpMode {
@@ -17,7 +17,7 @@ public class LimeLightTest extends OpMode {
     private final double FORWARD_SPEED = 0.2; // default forward drive speed
     private final double ROTATE_SPEED = 0.025; //default rotation speed both ways
 
-    TestBench bench = new TestBench();
+
     MecanumRobotDrive drive = new MecanumRobotDrive();
     double forward, strafe, rotate;
     public Limelight3A limelight3A;
