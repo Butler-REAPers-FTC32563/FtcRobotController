@@ -1,4 +1,3 @@
-package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

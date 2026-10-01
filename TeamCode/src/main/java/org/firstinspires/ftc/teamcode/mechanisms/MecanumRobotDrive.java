@@ -12,15 +12,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
-    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor, ArmExtendMotor, ArmAngleMotor;
+    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL;
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
+<<<<<<< HEAD
     private Servo limelight;
     private CRServo ConServo;
+=======
+>>>>>>> 2400b7b6ab925f5e5ffd2a1f141f73fb1d1e61c4
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
@@ -28,13 +31,15 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
+<<<<<<< HEAD
      ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
      ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
      limelight = hwMap.get(Servo.class, "limelight");
      ConServo = hwMap.get(CRServo.class, "ConServo");
+=======
+>>>>>>> 2400b7b6ab925f5e5ffd2a1f141f73fb1d1e61c4
 
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
-     intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -60,9 +65,6 @@ public class MecanumRobotDrive {
 
     }
 
-    public void setConServo(double power) {
-        ConServo.setPower(power);
-    }
 
     public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
@@ -70,7 +72,7 @@ public class MecanumRobotDrive {
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        double maxPower = 1.0;
+        double maxPower = 2;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));

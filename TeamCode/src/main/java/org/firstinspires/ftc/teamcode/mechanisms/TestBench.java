@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class TestBench {
-    private DigitalChannel touchSensor;
+
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRev; //revolution
     private IMU imu;
@@ -34,8 +34,6 @@ public class TestBench {
 
     public void init(HardwareMap hwMap) {
        // Touch Sensor
-        touchSensor = hwMap.get(DigitalChannel.class, "touch_sensor");
-        touchSensor.setMode(DigitalChannel.Mode.INPUT);
 
         // DC motor
         motor = hwMap.get(DcMotor.class, "motor");
@@ -69,13 +67,6 @@ public class TestBench {
         return imu.getRobotYawPitchRollAngles().getYaw(angleUnit);
     }
 // Touch Sensor
-        public boolean isTouchSensorPressed() {
-            return !touchSensor.getState();
-        }
-
-        public boolean isTouchSensorReleased() {
-            return touchSensor.getState();
-        }
 
 
 // Dc Motor
