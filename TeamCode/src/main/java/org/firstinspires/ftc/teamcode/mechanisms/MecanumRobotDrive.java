@@ -19,7 +19,7 @@ public class MecanumRobotDrive {
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
-    private Servo ClawServo;
+    private Servo limelight;
     private CRServo ConServo;
 
     public void init(HardwareMap hwMap) {
@@ -30,7 +30,7 @@ public class MecanumRobotDrive {
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
      ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
      ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
-     ClawServo = hwMap.get(Servo.class, "Claw_Servo");
+     limelight = hwMap.get(Servo.class, "limelight");
      ConServo = hwMap.get(CRServo.class, "ConServo");
 
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
