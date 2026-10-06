@@ -50,8 +50,10 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.update();
 
         if (gamepad1.dpadUpWasPressed()) {
-         drive.limelight(-1.0);
+         drive.limelightServo(1);
         }
-        if (gamepad1.dpadUpWasReleased()
-         drive.limelight (0);
+        if (gamepad1.dpadDownWasPressed()) {
+            drive.limelightServo (-1);
+        }
+
     }}
