@@ -12,15 +12,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
-    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor, ArmExtendMotor, ArmAngleMotor;
+    private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
+    private Servo limelightServo;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL;
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
-    public Servo limelight;
-    private CRServo ConServo;
 
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
@@ -28,12 +27,8 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
-     ArmExtendMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
-     ArmAngleMotor = hwMap.get(DcMotorEx.class, "Arm_Extend_Motor");
-     limelight = hwMap.get(Servo.class, "limelight");
-     ConServo = hwMap.get(CRServo.class, "ConServo");
-
-        backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+     limelightServo = hwMap.get(Servo.class, "ll_servo");
+     backRightMotor.setDirection(DcMotor.Direction.REVERSE);
      intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -59,11 +54,6 @@ public class MecanumRobotDrive {
 
 
     }
-
-    public void setConServo(double power) {
-        ConServo.setPower(power);
-    }
-
     public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
@@ -83,7 +73,7 @@ public class MecanumRobotDrive {
         frontRightPower = frontRightPower / maxPower;
         backRightPower = backRightPower / maxPower;
 
-        //normalize power to target RPM 
+        //normalize power to target RPM
         double maxRPM = 312;
         double frontLeftTargetRPM = frontLeftPower * maxRPM;
         double backLeftTargetRPM = backLeftPower * maxRPM;
@@ -96,7 +86,7 @@ public class MecanumRobotDrive {
         double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
         double backRightVelocity = (backRightTargetRPM * ticksPerRevBR) / 60.0;
 
-        // Set velocity 
+        // Set velocity
         frontLeftMotor.setVelocity(frontLeftVelocity);
         backLeftMotor.setVelocity(backLeftVelocity);
         frontRightMotor.setVelocity(frontRightVelocity);
@@ -152,4 +142,5 @@ public class MecanumRobotDrive {
         return (backRightMotor.getVelocity() / ticksPerRevBR) * 60;
     }
 
-    }
+
+}
