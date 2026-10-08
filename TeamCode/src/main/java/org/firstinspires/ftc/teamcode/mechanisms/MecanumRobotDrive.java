@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumRobotDrive {
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
-    private Servo limelightServo;
+    private Servo limelightServo, CameraServo;
     private IMU imu;
     private DcMotor motor; //linear slide motor 0
     private double ticksPerRevFL;
@@ -27,7 +27,7 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
-     limelightServo = hwMap.get(Servo.class, "ll_servo");
+     CameraServo = hwMap.get(Servo.class, "camera_servo");
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
      intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -54,7 +54,7 @@ public class MecanumRobotDrive {
 
 
     }
-    public void drive(double forward, double strafe, double rotate, double intake) {
+    public void drive(double forward, double strafe, double rotate, double intake, double CameraServoPOS) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
@@ -93,6 +93,8 @@ public class MecanumRobotDrive {
         backRightMotor.setVelocity(backRightVelocity);
         intakeMotor.setPower(intake);
 
+        //set servo rotate here
+
     }
 
     public void driveFieldRelative(double forward, double strafe, double rotate) {
@@ -105,7 +107,7 @@ public class MecanumRobotDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.drive(newForward, newStrafe, rotate, 0);
+        this.drive(newForward, newStrafe, rotate, 0, CameraServoPOS);
 
     }
     // normalizing ticks to revolutions

@@ -13,7 +13,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
 
-    double forward, strafe, rotate, intake;
+    double forward, strafe, rotate, intake, CameraServoPOS;
     boolean intakeOn;
 
     @Override
@@ -29,6 +29,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         rotate = gamepad1.right_stick_x;
 
 
+
         if (gamepad1.aWasReleased()) {
             intakeOn = !intakeOn;
         }
@@ -37,7 +38,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         intake = intakeOn ? 1 : 0;
 
 
-        drive.drive(forward, strafe, rotate, intake);
+        drive.drive(forward, strafe, rotate, intake, CameraServoPOS);
 
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
@@ -50,10 +51,12 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.update();
 
         if (gamepad1.dpadUpWasPressed()) {
-         drive.limelightServo(1);
+            CameraServoPOS + 1;
         }
         if (gamepad1.dpadDownWasPressed()) {
-            drive.limelightServo (-1);
+            CameraServoPOS - 1;
         }
+
+        
 
     }}
