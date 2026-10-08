@@ -10,7 +10,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
-
     double forward, strafe, rotate, intake;
     boolean intakeOn;
 
