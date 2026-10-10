@@ -2,12 +2,10 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 import static java.lang.Math.abs;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -20,6 +18,7 @@ public class MecanumRobotDrive {
     private double ticksPerRevBL;
     private double ticksPerRevBR;
 
+
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
      backLeftMotor = hwMap.get(DcMotorEx.class, "back_left_motor");
@@ -28,6 +27,7 @@ public class MecanumRobotDrive {
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
 
         backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -54,13 +54,14 @@ public class MecanumRobotDrive {
     }
 
 
+
     public void drive(double forward, double strafe, double rotate, double intake) {
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        double maxPower = 2;
+        double maxPower = 4;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
@@ -80,7 +81,7 @@ public class MecanumRobotDrive {
         double frontRightTargetRPM = frontRightPower * maxRPM;
         double backRightTargetRPM = backRightPower * maxRPM;
 
-        // Convert RPM to tps +with velocity
+        // Convert RPM to tps with velocity
         double frontLeftVelocity = (frontLeftTargetRPM * ticksPerRevFL) / 60.0;
         double backLeftVelocity = (backLeftTargetRPM * ticksPerRevBL) / 60.0;
         double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
@@ -112,15 +113,12 @@ public class MecanumRobotDrive {
     public double frontLeftMotor() {
         return frontLeftMotor.getCurrentPosition() / ticksPerRevFL;
     }
-
     public double frontRightMotor() {
         return frontRightMotor.getCurrentPosition() / ticksPerRevFR;
     }
-
     public double backLeftMotor() {
         return backLeftMotor.getCurrentPosition() / ticksPerRevBL;
     }
-
     public double backRightMotor() {
         return backRightMotor.getCurrentPosition() / ticksPerRevBR;
     }
@@ -129,15 +127,12 @@ public class MecanumRobotDrive {
     public double frontLeftRPM() {
         return (frontLeftMotor.getVelocity() / ticksPerRevFL) * 60;
     }
-
     public double frontRightRPM() {
         return (frontRightMotor.getVelocity() / ticksPerRevFR) * 60;
     }
-
     public double backLeftRPM() {
         return (backLeftMotor.getVelocity() / ticksPerRevBL) * 60;
     }
-
     public double backRightRPM() {
         return (backRightMotor.getVelocity() / ticksPerRevBR) * 60;
     }

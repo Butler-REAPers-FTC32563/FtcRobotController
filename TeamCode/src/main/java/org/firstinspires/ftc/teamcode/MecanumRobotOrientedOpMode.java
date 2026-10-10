@@ -28,6 +28,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         rotate = gamepad1.right_stick_x;
 
 
+
         if(gamepad1.aWasReleased()) {
             intakeOn = !intakeOn;
         }
@@ -48,7 +49,10 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("IntakeOn", intakeOn);
         telemetry.update();
 
+
     }
 }
+
+
 
 
