@@ -74,8 +74,7 @@ public class MecanumRobotDrive {
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        // scale all wheels the same so the biggest one is full power
-        double maxPower = 1.0;
+        double maxPower = 4;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
