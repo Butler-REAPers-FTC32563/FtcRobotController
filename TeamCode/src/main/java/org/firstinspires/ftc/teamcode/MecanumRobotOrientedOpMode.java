@@ -19,7 +19,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     private static final DcMotorSimple.Direction INTAKE_SERVO_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
     // camera servo moves this much per dpad press
-    private static final double SERVO_STEP = 0.02;
+    private static final double SERVO_STEP = 0.04;
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
