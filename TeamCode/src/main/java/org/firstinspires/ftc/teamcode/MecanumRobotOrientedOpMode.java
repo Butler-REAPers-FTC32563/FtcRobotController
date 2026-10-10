@@ -14,10 +14,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // max motor rpm
     private static final double MAX_RPM = 312;
 
-    // intake servo speed
-    private static final double INTAKE_SERVO_SPEED = 0.8;
-
-    // servo direction, servo 2 gets set opposite. flip if they spin the
+    // servo direction, right gets set opposite left. flip if they spin the
     // wrong way
     private static final DcMotorSimple.Direction INTAKE_SERVO_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
@@ -42,7 +39,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
         // give the mechanism its numbers
         drive.setMaxRPM(MAX_RPM);
-        drive.setIntakeServoSpeed(INTAKE_SERVO_SPEED);
         drive.setIntakeServoDirection(INTAKE_SERVO_DIRECTION);
         drive.setCameraServoPos(cameraServoPos);
     }
@@ -79,8 +75,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("BackRight RPM", drive.backRightRPM());
         telemetry.addData("IntakeOn", intakeOn);
         telemetry.addData("CameraServoPos", drive.cameraServoPos());
-        telemetry.addData("IntakeServo1Power", drive.intakeServo1Power());
-        telemetry.addData("IntakeServo2Power", drive.intakeServo2Power());
+        telemetry.addData("IntakeServoLeftPower", drive.intakeServoLeftPower());
+        telemetry.addData("IntakeServoRightPower", drive.intakeServoRightPower());
         telemetry.update();
     }
 }

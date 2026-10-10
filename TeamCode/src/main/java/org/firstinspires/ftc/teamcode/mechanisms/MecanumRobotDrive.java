@@ -16,8 +16,8 @@ public class MecanumRobotDrive {
 
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private Servo CameraServo;
-    private CRServo intakeServo1;
-    private CRServo intakeServo2;
+    private CRServo intakeServoLeft;
+    private CRServo intakeServoRight;
     private IMU imu;
     private DcMotor motor; // linear slide motor, not currently used
     private double ticksPerRevFL;
@@ -27,7 +27,6 @@ public class MecanumRobotDrive {
 
     // set from the opmode
     private double maxRPM;
-    private double intakeServoSpeed;
 
     // grab all the hardware
     public void init(HardwareMap hwMap) {
@@ -37,15 +36,14 @@ public class MecanumRobotDrive {
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
      CameraServo = hwMap.get(Servo.class, "camera_servo");
-     intakeServo1 = hwMap.get(CRServo.class, "intake_servo_1");
-     intakeServo2 = hwMap.get(CRServo.class, "intake_servo_2");
+     intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
+     intakeServoRight = hwMap.get(CRServo.class, "intake_servo_right");
 
-     // continuous servos spin forever if powered, stop them til drive runs
-     intakeServo1.setPower(0.0);
-     intakeServo2.setPower(0.0);
+     // stop them til drive runs
+     intakeServoLeft.setPower(0.0);
+     intakeServoRight.setPower(0.0);
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
-     intakeMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -106,8 +104,8 @@ public class MecanumRobotDrive {
         intakeMotor.setPower(intake);
 
         // intake servos follow the intake
-        intakeServo1.setPower(intake * intakeServoSpeed);
-        intakeServo2.setPower(intake * intakeServoSpeed);
+        intakeServoLeft.setPower(intake);
+        intakeServoRight.setPower(intake);
     }
 
     // max motor speed
@@ -115,15 +113,10 @@ public class MecanumRobotDrive {
         maxRPM = rpm;
     }
 
-    // intake servo speed
-    public void setIntakeServoSpeed(double speed) {
-        intakeServoSpeed = Math.max(-1.0, Math.min(1.0, speed));
-    }
-
-    // servo 2 goes opposite servo 1
+    // right servo goes opposite left
     public void setIntakeServoDirection(DcMotorSimple.Direction direction) {
-        intakeServo1.setDirection(direction);
-        intakeServo2.setDirection(direction.inverted());
+        intakeServoLeft.setDirection(direction);
+        intakeServoRight.setDirection(direction.inverted());
     }
 
     // keep in 0-1 or the sdk throws
@@ -136,14 +129,14 @@ public class MecanumRobotDrive {
         return CameraServo.getPosition();
     }
 
-    // servo 1 power
-    public double intakeServo1Power() {
-        return intakeServo1.getPower();
+    // left servo power
+    public double intakeServoLeftPower() {
+        return intakeServoLeft.getPower();
     }
 
-    // servo 2 power
-    public double intakeServo2Power() {
-        return intakeServo2.getPower();
+    // right servo power
+    public double intakeServoRightPower() {
+        return intakeServoRight.getPower();
     }
 
     // field relative drive, no intake here
