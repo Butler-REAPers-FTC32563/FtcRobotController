@@ -1,40 +1,54 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
-import static java.lang.Math.abs;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
+// mecanum drive + intake + camera servo
 public class MecanumRobotDrive {
+
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
+    private Servo CameraServo;
+    private CRServo intakeServoLeft;
+    private CRServo intakeServoRight;
     private IMU imu;
-    private DcMotor motor; //linear slide motor 0
+    private DcMotor motor; // linear slide motor, not currently used
     private double ticksPerRevFL;
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
 
+    // set from the opmode
+    private double maxRPM;
 
+    // grab all the hardware
     public void init(HardwareMap hwMap) {
      frontLeftMotor = hwMap.get(DcMotorEx.class, "front_left_motor");
      backLeftMotor = hwMap.get(DcMotorEx.class, "back_left_motor");
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
+     CameraServo = hwMap.get(Servo.class, "camera_servo");
+     intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
+     intakeServoRight = hwMap.get(CRServo.class, "intake_servo_right");
 
-        backRightMotor.setDirection(DcMotor.Direction.REVERSE);
+     // stop them til drive runs
+     intakeServoLeft.setPower(0.0);
+     intakeServoRight.setPower(0.0);
 
+     backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
      frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
      backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
 
      imu = hwMap.get(IMU.class, "imu");
 
@@ -44,18 +58,15 @@ public class MecanumRobotDrive {
 
         imu.initialize(new IMU.Parameters(RevOrientation));
 
-        // Dc motor
+        // ticks per rev for each wheel
         ticksPerRevFL = frontLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevFR = frontRightMotor.getMotorType().getTicksPerRev();
         ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
-
-
     }
-
-
-
+    // -1 to 1 for forward/strafe/rotate, intake is just 0 or 1
     public void drive(double forward, double strafe, double rotate, double intake) {
+        // combine the inputs for each wheel
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
@@ -68,34 +79,67 @@ public class MecanumRobotDrive {
         maxPower = Math.max(maxPower, Math.abs(frontRightPower));
         maxPower = Math.max(maxPower, Math.abs(backRightPower));
 
-        // Normalize power values
         frontLeftPower = frontLeftPower / maxPower;
         backLeftPower = backLeftPower / maxPower;
         frontRightPower = frontRightPower / maxPower;
         backRightPower = backRightPower / maxPower;
 
-        //normalize power to target RPM 
-        double maxRPM = 312;
+        // power to rpm
         double frontLeftTargetRPM = frontLeftPower * maxRPM;
         double backLeftTargetRPM = backLeftPower * maxRPM;
         double frontRightTargetRPM = frontRightPower * maxRPM;
         double backRightTargetRPM = backRightPower * maxRPM;
 
-        // Convert RPM to tps with velocity
+        // rpm to ticks per sec
         double frontLeftVelocity = (frontLeftTargetRPM * ticksPerRevFL) / 60.0;
         double backLeftVelocity = (backLeftTargetRPM * ticksPerRevBL) / 60.0;
         double frontRightVelocity = (frontRightTargetRPM * ticksPerRevFR) / 60.0;
         double backRightVelocity = (backRightTargetRPM * ticksPerRevBR) / 60.0;
 
-        // Set velocity 
+        // drive motors
         frontLeftMotor.setVelocity(frontLeftVelocity);
         backLeftMotor.setVelocity(backLeftVelocity);
         frontRightMotor.setVelocity(frontRightVelocity);
         backRightMotor.setVelocity(backRightVelocity);
         intakeMotor.setPower(intake);
 
+        // intake servos follow the intake
+        intakeServoLeft.setPower(intake);
+        intakeServoRight.setPower(intake);
     }
 
+    // max motor speed
+    public void setMaxRPM(double rpm) {
+        maxRPM = rpm;
+    }
+
+    // right servo goes opposite left
+    public void setIntakeServoDirection(DcMotorSimple.Direction direction) {
+        intakeServoLeft.setDirection(direction);
+        intakeServoRight.setDirection(direction.inverted());
+    }
+
+    // keep in 0-1 or the sdk throws
+    public void setCameraServoPos(double pos) {
+        CameraServo.setPosition(Math.max(0.0, Math.min(1.0, pos)));
+    }
+
+    // camera servo position
+    public double cameraServoPos() {
+        return CameraServo.getPosition();
+    }
+
+    // left servo power
+    public double intakeServoLeftPower() {
+        return intakeServoLeft.getPower();
+    }
+
+    // right servo power
+    public double intakeServoRightPower() {
+        return intakeServoRight.getPower();
+    }
+
+    // field relative drive, no intake here
     public void driveFieldRelative(double forward, double strafe, double rotate) {
         double theta = Math.atan2(forward, strafe);
         double r = Math.hypot(strafe, forward);
@@ -109,30 +153,36 @@ public class MecanumRobotDrive {
         this.drive(newForward, newStrafe, rotate, 0);
 
     }
-    // normalizing ticks to revolutions
+    // wheel revs since reset
     public double frontLeftMotor() {
         return frontLeftMotor.getCurrentPosition() / ticksPerRevFL;
     }
+
     public double frontRightMotor() {
         return frontRightMotor.getCurrentPosition() / ticksPerRevFR;
     }
+
     public double backLeftMotor() {
         return backLeftMotor.getCurrentPosition() / ticksPerRevBL;
     }
+
     public double backRightMotor() {
         return backRightMotor.getCurrentPosition() / ticksPerRevBR;
     }
 
-    // RPM calculations
+    // wheel rpm
     public double frontLeftRPM() {
         return (frontLeftMotor.getVelocity() / ticksPerRevFL) * 60;
     }
+
     public double frontRightRPM() {
         return (frontRightMotor.getVelocity() / ticksPerRevFR) * 60;
     }
+
     public double backLeftRPM() {
         return (backLeftMotor.getVelocity() / ticksPerRevBL) * 60;
     }
+
     public double backRightRPM() {
         return (backRightMotor.getVelocity() / ticksPerRevBR) * 60;
     }
