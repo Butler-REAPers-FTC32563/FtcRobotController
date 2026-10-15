@@ -30,7 +30,7 @@ buildscript {
 
     }
     dependencies {
-        classpath "dev.frozenmilk:Load:SNAPSHOT-5b56925"
+        classpath "dev.frozenmilk:Load:0.3.2"
 
     }
 }
@@ -73,7 +73,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.frozenmilk.sinister:Sloth:SNAPSHOT-5b56925")
+    implementation("dev.frozenmilk.sinister:Sloth:0.3.2")
     implementation project(':FtcRobotController')
     implementation "com.bylazar:fullpanels:1.0.12"
 }
