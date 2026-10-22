@@ -16,7 +16,7 @@ public class LimeLightTest extends OpMode {
 
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
-    double forward, strafe, rotate;
+    double forward, strafe, rotate, intake;
     public Limelight3A limelight3A;
 
 
@@ -53,30 +53,34 @@ public class LimeLightTest extends OpMode {
             if (llResult.getTx() >= 6) {
                 forward = 0;
                 rotate = ROTATE_SPEED;
+                intake = 1;
             }
             // rotate counterclockwise
             else if (llResult.getTx() <= -6) {
                 forward = 0;
                 rotate = -ROTATE_SPEED;
+                intake = 1;
 
             }
             // when x is centered drive towards the ball
             else if (Math.abs(llResult.getTx()) <= 6 && llResult.getTa() <= 15 ) {
                 rotate = 0;
                 forward = FORWARD_SPEED;
+                intake = 1;
             }
             // if ball is detected but close enough stop motors
             else {
                 rotate = 0;
                 forward = 0;
                 strafe = 0;
+                intake = 0;
             }
 
             // if no ball found rotate clockwise to find ball
             if (!llResult.isValid()) {
                 rotate = ROTATE_SPEED;
             }
-            drive.drive(forward, strafe, rotate, 0);
+            drive.drive(forward, strafe, rotate, intake);
 
             //update and add telemetry
             telemetry.update();

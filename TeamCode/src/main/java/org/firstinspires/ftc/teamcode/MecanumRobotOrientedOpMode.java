@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 
 @TeleOp
@@ -32,8 +36,13 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // intake on/off, A toggles it
     boolean intakeOn;
 
+    public Limelight3A limelight3A;
+
     @Override
     public void init() {
+        // setup limelight and pipeline
+        limelight3A = hardwareMap.get(Limelight3A.class, "limeLight");
+        limelight3A.pipelineSwitch(2); //  pipeline 8 for Apriltags
 
         drive.init(hardwareMap);
 
@@ -41,6 +50,14 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         drive.setMaxRPM(MAX_RPM);
         drive.setIntakeServoDirection(INTAKE_SERVO_DIRECTION);
         drive.setCameraServoPos(cameraServoPos);
+
+
+    }
+
+    @Override
+    public void start() {
+        // the limelight only returns results once it is running
+        limelight3A.start();
     }
 
     @Override
@@ -77,6 +94,36 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("CameraServoPos", drive.cameraServoPos());
         telemetry.addData("IntakeServoLeftPower", drive.intakeServoLeftPower());
         telemetry.addData("IntakeServoRightPower", drive.intakeServoRightPower());
+
+        addAprilTagTelemetry();
+
         telemetry.update();
+    }
+
+    // reads the april tags out of the limelight's fiducial pipeline
+    private void addAprilTagTelemetry() {
+        LLResult result = limelight3A.getLatestResult();
+        if (result == null || !result.isValid()) {
+            telemetry.addData("Limelight", "no valid result");
+            return;
+        }
+
+        for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+
+            // 3d pose roll, needs the tag pose to be computed by the pipeline
+            double poseRoll = tag.getTargetPoseCameraSpace()
+                    .getOrientation()
+                    .getRoll(AngleUnit.DEGREES);
+
+            //Telemetry for the roll of the april tag
+            String prefix = "Tag " + tag.getFiducialId() + " ";
+            telemetry.addData(prefix + "Roll(pose)", "%.1f deg", poseRoll);
+            telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
+                    tag.getTargetXDegrees(), tag.getTargetYDegrees());
+        }
+
+        if (result.getFiducialResults().isEmpty()) {
+            telemetry.addData("Limelight", "no tags in view");
+        }
     }
 }
