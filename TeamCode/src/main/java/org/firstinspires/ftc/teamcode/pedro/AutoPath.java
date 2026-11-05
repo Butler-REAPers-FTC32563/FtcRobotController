@@ -22,19 +22,13 @@ public class AutoPath extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(56, 8, 90);
-    private final Pose path1 = poseFactory.of(56, 36, 90);
-    private final Pose point2 = poseFactory.of(24, 36, 90);
-    private final Pose point3 = poseFactory.of(24, 107, 90);
-    private final Pose point4 = poseFactory.of(8, 107, 90);
+    private final Pose start = poseFactory.of(132, 72, -90);
+    private final Pose path1 = poseFactory.of(132, 48, -90);
 
     // Autonomous routine
     public Command autoRoutine() {
         return sequential(
-                follow(follower, path1()),
-                follow(follower, path2()),
-                follow(follower, path3()),
-                follow(follower, path4())
+                follow(follower, path1())
         );
     }
 
@@ -66,18 +60,6 @@ public class AutoPath extends LinearOpMode {
     }
 
     public Path path1() {
-        return line(start, path1).linear(start, path1);
-    }
-
-    public Path path2() {
-        return line(path1, point2).linear(path1, point2);
-    }
-
-    public Path path3() {
-        return line(point2, point3).linear(point2, point3);
-    }
-
-    public Path path4() {
-        return line(point3, point4).constant(point4);
+        return line(start, path1).constant(path1);
     }
 }
