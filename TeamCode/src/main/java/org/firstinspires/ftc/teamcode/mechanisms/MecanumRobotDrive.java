@@ -64,8 +64,19 @@ public class MecanumRobotDrive {
         ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
+    // Polarity of the drive. The wheels on this robot are mirrored left<->right
+    // compared to the standard layout, so pure strafe and pure rotate come out
+    // backwards while forward stays correct. Flipping these two signs is the same
+    // as swapping the left/right motor ports. Set them back to +1 if the drive is
+    // rewired or the Driver Station motor config is fixed.
+    private static final double STRAFE_SIGN = -1.0;
+    private static final double ROTATE_SIGN = -1.0;
+
     // -1 to 1 for forward/strafe/rotate, intake is just 0 or 1
     public void drive(double forward, double strafe, double rotate, double intake) {
+        strafe *= STRAFE_SIGN;
+        rotate *= ROTATE_SIGN;
+
         // combine the inputs for each wheel
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
