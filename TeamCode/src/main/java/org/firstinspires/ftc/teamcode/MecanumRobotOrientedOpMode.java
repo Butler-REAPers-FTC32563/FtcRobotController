@@ -122,6 +122,12 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         if (gamepad1.dpadDownWasPressed()) {
             cameraServoPos = Math.max(0.0, cameraServoPos - SERVO_STEP);
         }
+
+        if (tagRoll > 45) {
+          //  light = 1);
+        }
+
+
         drive.setCameraServoPos(cameraServoPos);
 
         drive.drive(forward, strafe, rotate, intake);
