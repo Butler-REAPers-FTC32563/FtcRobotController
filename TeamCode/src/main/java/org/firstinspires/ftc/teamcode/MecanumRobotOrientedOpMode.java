@@ -10,6 +10,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 
+import java.util.Collections;
+import java.util.List;
+
 @TeleOp
 public class MecanumRobotOrientedOpMode extends OpMode {
 
@@ -36,12 +39,19 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // intake on/off, A toggles it
     boolean intakeOn;
 
-    // latest AprilTag reading, refreshed every loop by addAprilTagTelemetry().
+    // latest AprilTag reading, refreshed once at the top of loop() by
+    // updateAprilTagState(), so everything in that loop reads this frame's
+    // value and never the previous frame's.
     // tagId stays -1 while no tag is in view, so tagRoll is only trustworthy
     // when tagId >= 0. When several tags share a frame, the first one wins.
     // This is the raw first-tag value; mechanismAngle below is the useful one.
     private int tagId = -1;
     private double tagRoll;
+
+    // the frame updateAprilTagState() read, kept so the telemetry pass reports
+    // exactly the same frame instead of pulling a second one
+    private LLResult tagResult;
+    private List<LLResultTypes.FiducialResult> tagFiducials = Collections.emptyList();
 
     // --- mechanism angle from its three AprilTags ---
 
@@ -96,6 +106,10 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     @Override
     public void loop() {
+        // read the AprilTags before anything uses them: tagRoll, tagId and
+        // mechanismAngle must be this frame's values, not the last one's
+        updateAprilTagState();
+
         // Stick layout: left stick = forward/back + rotate, right stick left/right = strafe.
         // This is paired with STRAFE_SIGN/ROTATE_SIGN in MecanumRobotDrive: this robot's drive
         // is mirrored left<->right, so those two signs are what make these sticks drive straight.
@@ -123,9 +137,16 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             cameraServoPos = Math.max(0.0, cameraServoPos - SERVO_STEP);
         }
 
-        if (tagRoll > 45) {
-          //  light = 1);
-        }
+        // TODO(carson): turn the status light on from the mechanism tag angle.
+        // Needs the light hardware member first - it does not exist in this
+        // class yet, so this stays a comment until it is wired up.
+        // tagRoll here is this frame's raw first-tag roll (updateAprilTagState
+        // runs at the top of loop), and it is reset to 0 every frame, so
+        // tagId >= 0 is what separates "no tag in view" from "tag at 0 deg".
+        // When the light exists: on above 45, off below 40 so it cannot
+        // flicker on the threshold, and off whenever tagId < 0.
+        //   if (tagId >= 0 && tagRoll > 45) { light = 1; }
+        //   else if (tagId < 0 || tagRoll < 40) { light = 0; }
 
 
         drive.setCameraServoPos(cameraServoPos);
@@ -150,45 +171,56 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.update();
     }
 
-    // reads the april tags out of the limelight's fiducial pipeline
-    private void addAprilTagTelemetry() {
+    // Reads the AprilTags and updates tagId, tagRoll and mechanismAngle.
+    // No telemetry here: this runs at the top of loop(), and the telemetry pass
+    // further down reports whatever this frame produced.
+    private void updateAprilTagState() {
         // drop the previous reading first: a loop with no tag must not leave a
         // stale angle behind for the drive code to use
         tagId = -1;
         tagRoll = 0;
 
-        LLResult result = limelight3A.getLatestResult();
-        if (result == null || !result.isValid()) {
+        tagResult = limelight3A.getLatestResult();
+        if (tagResult == null || !tagResult.isValid()) {
+            tagResult = null;  // nothing valid this frame, telemetry says so below
+            tagFiducials = Collections.emptyList();
             mechanismTagId = -1;
-            telemetry.addData("Limelight", "no valid result");
             return;
         }
 
-        for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+        tagFiducials = tagResult.getFiducialResults();
 
-            // 3d pose roll, needs the tag pose to be computed by the pipeline
-            double poseRoll = tag.getTargetPoseCameraSpace()
-                    .getOrientation()
-                    .getRoll(AngleUnit.DEGREES);
-
+        for (LLResultTypes.FiducialResult tag : tagFiducials) {
             // keep the first tag of the frame as the opmode-wide angle
             if (tagId < 0) {
                 tagId = tag.getFiducialId();
-                tagRoll = poseRoll;
+                // 3d pose roll, needs the tag pose to be computed by the pipeline
+                tagRoll = tag.getTargetPoseCameraSpace()
+                        .getOrientation()
+                        .getRoll(AngleUnit.DEGREES);
             }
-
-            //Telemetry for the roll of the april tag
-            String prefix = "Tag " + tag.getFiducialId() + " ";
-            telemetry.addData(prefix + "Roll(pose)", "%.1f deg", poseRoll);
-            telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
-                    tag.getTargetXDegrees(), tag.getTargetYDegrees());
         }
 
-        updateMechanismAngle(result);
+        updateMechanismAngle();
+    }
 
-        if (result.getFiducialResults().isEmpty()) {
+    // reports the frame updateAprilTagState() read, nothing more
+    private void addAprilTagTelemetry() {
+        if (tagResult == null) {
+            telemetry.addData("Limelight", "no valid result");
+        } else if (tagFiducials.isEmpty()) {
             telemetry.addData("Limelight", "no tags in view");
         } else {
+            for (LLResultTypes.FiducialResult tag : tagFiducials) {
+                //Telemetry for the roll of the april tag
+                String prefix = "Tag " + tag.getFiducialId() + " ";
+                telemetry.addData(prefix + "Roll(pose)", "%.1f deg",
+                        tag.getTargetPoseCameraSpace()
+                                .getOrientation()
+                                .getRoll(AngleUnit.DEGREES));
+                telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
+                        tag.getTargetXDegrees(), tag.getTargetYDegrees());
+            }
             telemetry.addData("TagRoll", "%.1f deg (id %d)", tagRoll, tagId);
         }
 
@@ -204,9 +236,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // frontal one, so its pose-derived roll carries the least perspective error.
     // Coplanar tags need no averaging for this to be right, and a tag clocked
     // further round the mechanism carries its own mount offset instead.
-    private void updateMechanismAngle(LLResult result) {
+    private void updateMechanismAngle() {
         LLResultTypes.FiducialResult best = null;
-        for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+        for (LLResultTypes.FiducialResult tag : tagFiducials) {
             if (!isMechanismTag(tag.getFiducialId())) {
                 continue;
             }
