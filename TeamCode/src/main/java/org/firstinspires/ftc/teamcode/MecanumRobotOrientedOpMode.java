@@ -110,13 +110,12 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         // mechanismAngle must be this frame's values, not the last one's
         updateAprilTagState();
 
-        // Stick layout: left stick = forward/back + rotate, right stick left/right = strafe.
-        // This is paired with STRAFE_SIGN/ROTATE_SIGN in MecanumRobotDrive: this robot's drive
-        // is mirrored left<->right, so those two signs are what make these sticks drive straight.
-        // Changing one without the other puts strafe and rotate back on the wrong axes.
+        // Standard SDK stick layout: left stick = forward/back + strafe, right stick = rotate.
+        // The old right-stick-strafe layout existed only to cancel the mirrored left<->right
+        // drive; that mirror was fixed in hardware, so the swap is gone.
         forward = -gamepad1.left_stick_y;
-        strafe = gamepad1.right_stick_x;
-        rotate = gamepad1.left_stick_x;
+        strafe = gamepad1.left_stick_x;
+        rotate = gamepad1.right_stick_x;
 
         // A toggles intake (runs the servos too)
         if (gamepad1.aWasReleased()) {
