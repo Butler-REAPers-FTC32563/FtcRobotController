@@ -27,17 +27,13 @@ public class PedroCodeFull extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(58.75, 7.75, 90);
-    private final Pose path1 = poseFactory.of(58.75, 10.75, 90);
-    private final Pose point2 = poseFactory.of(34.75, 10.75, 180);
+    private final Pose start = poseFactory.of(58.75, 4.75, 90);
+    private final Pose path1 = poseFactory.of(58.8, 16, 90);
+    private final Pose point2 = poseFactory.of(34.75, 16.75, 180);
     private final Pose point3 = poseFactory.of(34.75, 7.75, 180);
-    private final Pose point4 = poseFactory.of(10.75, 7.75, 180);
-    private final Pose point5 = poseFactory.of(10.75, 10.75, 90);
-    private final Pose point6 = poseFactory.of(58.75, 7.75, 90);
-    private final Pose point7 = poseFactory.of(10.75, 76.75, 90);
-    private final Pose point8 = poseFactory.of(43.75, 115.75, 90);
-    private final Pose point9 = poseFactory.of(43.75, 130.75, 90);
-    private final Pose point10 = poseFactory.of(55.75, 130.75, -90);
+    private final Pose point4 = poseFactory.of(16.75, 7.75, 180);
+    private final Pose point5 = poseFactory.of(16.75, 16.75, 90);
+    private final Pose point6 = poseFactory.of(58.75, 4.75, 90);
 
     // Autonomous routine
     public Command autoRoutine() {
@@ -47,11 +43,7 @@ public class PedroCodeFull extends LinearOpMode {
                 follow(follower, path3()),
                 follow(follower, path4()),
                 follow(follower, path5()),
-                follow(follower, path6()),
-                follow(follower, path7()),
-                follow(follower, path8()),
-                follow(follower, path9()),
-                follow(follower, path10())
+                follow(follower, path6())
         );
     }
 
@@ -104,21 +96,5 @@ public class PedroCodeFull extends LinearOpMode {
 
     public Path path6() {
         return Paths.line(point5, point6).constant(point6);
-    }
-
-    public Path path7() {
-        return Paths.line(point6, point7).constant(point7);
-    }
-
-    public Path path8() {
-        return Paths.line(point7, point8).constant(point8);
-    }
-
-    public Path path9() {
-        return Paths.line(point8, point9).constant(point9);
-    }
-
-    public Path path10() {
-        return Paths.line(point9, point10).constant(point10);
     }
 }
