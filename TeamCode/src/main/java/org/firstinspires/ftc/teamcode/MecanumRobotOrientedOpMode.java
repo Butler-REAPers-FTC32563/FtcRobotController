@@ -18,67 +18,68 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     // tuning numbers go here
 
-    // max motor rpm
+    // motor free speed in rpm
     private static final double MAX_RPM = 312;
 
-    // servo direction, right gets set opposite left. flip if they spin the
-    // wrong way
+    // intake servo direction, right gets set opposite left
     private static final DcMotorSimple.Direction INTAKE_SERVO_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-    // camera servo moves this much per dpad press
+    // camera servo change per dpad press
     private static final double SERVO_STEP = 0.04;
+
+    // a cell is scorable while its tags are this close to upright
+    private static final double CELL_UP_DEGREES = 90;
+    private static final double CELL_UP_HYSTERESIS = 5;
+
+    // goBILDA light: 0 off, 0.5 is greenish
+    private static final double LIGHT_ON_POS = 0.5;
+    private static final double LIGHT_OFF_POS = 0.0;
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
-    // stick values
+    // joystick and intake inputs
     double forward, strafe, rotate, intake;
 
     // camera servo pos 0 to 1
     private double cameraServoPos = 0.5;
 
-    // intake on/off, A toggles it
+    // intake on/off, toggled with A
     boolean intakeOn;
 
-    // latest AprilTag reading, refreshed once at the top of loop() by
-    // updateAprilTagState(), so everything in that loop reads this frame's
-    // value and never the previous frame's.
-    // tagId stays -1 while no tag is in view, so tagRoll is only trustworthy
-    // when tagId >= 0. When several tags share a frame, the first one wins.
-    // This is the raw first-tag value; mechanismAngle below is the useful one.
+    // true when the cell we are looking at can be scored
+    private boolean cellUp;
+
+    // first tag in this frame's reading, set by updateAprilTagState().
+    // tagId is -1 when no tag is in view.
     private int tagId = -1;
     private double tagRoll;
 
-    // the frame updateAprilTagState() read, kept so the telemetry pass reports
-    // exactly the same frame instead of pulling a second one
+    // Limelight result this frame's tags came from, reused by telemetry
     private LLResult tagResult;
     private List<LLResultTypes.FiducialResult> tagFiducials = Collections.emptyList();
 
-    // --- mechanism angle from its three AprilTags ---
+    // hive tags, 4 per cell: 30-33 red scoring, 34-37 red audience,
+    // 38-41 blue audience, 42-45 blue scoring
+    private static final int[] HIVE_TAG_IDS = {
+            30, 31, 32, 33,
+            34, 35, 36, 37,
+            38, 39, 40, 41,
+            42, 43, 44, 45,
+    };
 
-    // IDs of the tags mounted on the mechanism. Leave this empty to accept any
-    // tag in view, which is the only option while the IDs are still unknown.
-    private static final int[] MECHANISM_TAG_IDS = {};
+    // angle smoothing 0 to 1. 0 = raw, 1 = frozen.
+    private static final double HIVE_ANGLE_SMOOTHING = 0.25;
 
-    // Mount angle of each tag in degrees, measured from the mechanism's zero
-    // position, same sign convention as the roll reading. Index 0 belongs to
-    // MECHANISM_TAG_IDS[0] and so on. Three tags on one flat face are all 0;
-    // tags clocked around the rotation axis each need their own number.
-    private static final double[] MECHANISM_TAG_MOUNT_DEGREES = {};
+    // degrees subtracted so a chosen position reads 0. Y sets a new zero.
+    private double hiveZeroDegrees;
 
-    // 0 to 1 exponential filter on the reported angle. 0 = raw/jittery,
-    // 1 = frozen. 0.25 settles in a few frames at 50 Hz.
-    private static final double MECHANISM_ANGLE_SMOOTHING = 0.25;
-
-    // degrees subtracted so the mechanism's rest position reads 0. Y on
-    // gamepad1 captures a new zero from the tag currently in view.
-    private double mechanismZeroDegrees;
-
-    // last mechanism angle, NaN until a tag has ever been seen
-    private double mechanismAngle = Double.NaN;
-    // which tag that angle came from, -1 when the last frame had none
-    private int mechanismTagId = -1;
-    // roll + mount offset before zeroing/smoothing, needed to capture a zero
-    private double mechanismRawDegrees = Double.NaN;
+    // last hive angle, NaN until a tag has been seen
+    private double hiveAngle = Double.NaN;
+    // roll of the tag the angle came from, before zeroing. this is what says
+    // whether the cell is up.
+    private double hiveRoll = Double.NaN;
+    // tag the angle came from, -1 if the last frame had none
+    private int hiveTagId = -1;
 
     public Limelight3A limelight3A;
 
@@ -86,49 +87,43 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     public void init() {
         // setup limelight and pipeline
         limelight3A = hardwareMap.get(Limelight3A.class, "limeLight");
-        limelight3A.pipelineSwitch(2); //  pipeline 8 for Apriltags
+        limelight3A.pipelineSwitch(2); // AprilTag pipeline, check the number in the Limelight UI
 
         drive.init(hardwareMap);
 
-        // give the mechanism its numbers
         drive.setMaxRPM(MAX_RPM);
         drive.setIntakeServoDirection(INTAKE_SERVO_DIRECTION);
         drive.setCameraServoPos(cameraServoPos);
-
-
     }
 
     @Override
     public void start() {
-        // the limelight only returns results once it is running
+        // Limelight only returns results after start()
         limelight3A.start();
     }
 
     @Override
     public void loop() {
-        // read the AprilTags before anything uses them: tagRoll, tagId and
-        // mechanismAngle must be this frame's values, not the last one's
+        // read the tags first so the rest of loop() uses this frame's values
         updateAprilTagState();
 
-        // Standard SDK stick layout: left stick = forward/back + strafe, right stick = rotate.
-        // The old right-stick-strafe layout existed only to cancel the mirrored left<->right
-        // drive; that mirror was fixed in hardware, so the swap is gone.
+        // standard stick layout: left = forward/back + strafe, right = rotate
         forward = -gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        // A toggles intake (runs the servos too)
+        // A toggles the intake, servos follow
         if (gamepad1.aWasReleased()) {
             intakeOn = !intakeOn;
         }
         intake = intakeOn ? 1 : 0;
 
-        // Y re-zeroes the mechanism angle at wherever the mechanism sits now
+        // Y sets the current position as the new zero
         if (gamepad1.yWasPressed()) {
-            rezeroMechanism();
+            rezeroHive();
         }
 
-        // dpad moves the camera, clamp here so it cant wind past the ends
+        // dpad moves the camera servo, kept in 0 to 1
         if (gamepad1.dpadUpWasPressed()) {
             cameraServoPos = Math.min(1.0, cameraServoPos + SERVO_STEP);
         }
@@ -136,17 +131,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             cameraServoPos = Math.max(0.0, cameraServoPos - SERVO_STEP);
         }
 
-        // TODO(carson): turn the status light on from the mechanism tag angle.
-        // Needs the light hardware member first - it does not exist in this
-        // class yet, so this stays a comment until it is wired up.
-        // tagRoll here is this frame's raw first-tag roll (updateAprilTagState
-        // runs at the top of loop), and it is reset to 0 every frame, so
-        // tagId >= 0 is what separates "no tag in view" from "tag at 0 deg".
-        // When the light exists: on above 45, off below 40 so it cannot
-        // flicker on the threshold, and off whenever tagId < 0.
-        //   if (tagId >= 0 && tagRoll > 45) { light = 1; }
-        //   else if (tagId < 0 || tagRoll < 40) { light = 0; }
-
+        // light shows whether the cell we are looking at can be scored
+        updateCellUp();
+        drive.setTestLightPos(cellUp ? LIGHT_ON_POS : LIGHT_OFF_POS);
 
         drive.setCameraServoPos(cameraServoPos);
 
@@ -163,19 +150,16 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("CameraServoPos", drive.cameraServoPos());
         telemetry.addData("IntakeServoLeftPower", drive.intakeServoLeftPower());
         telemetry.addData("IntakeServoRightPower", drive.intakeServoRightPower());
-        telemetry.addData("TagVar", tagRoll);
+        telemetry.addData("CellUp", cellUp);
 
         addAprilTagTelemetry();
 
         telemetry.update();
     }
 
-    // Reads the AprilTags and updates tagId, tagRoll and mechanismAngle.
-    // No telemetry here: this runs at the top of loop(), and the telemetry pass
-    // further down reports whatever this frame produced.
+    // reads the tags, updates tagId, tagRoll and the hive angle
     private void updateAprilTagState() {
-        // drop the previous reading first: a loop with no tag must not leave a
-        // stale angle behind for the drive code to use
+        // clear the old reading first so nothing stale survives this loop
         tagId = -1;
         tagRoll = 0;
 
@@ -183,27 +167,27 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         if (tagResult == null || !tagResult.isValid()) {
             tagResult = null;  // nothing valid this frame, telemetry says so below
             tagFiducials = Collections.emptyList();
-            mechanismTagId = -1;
+            hiveTagId = -1;
             return;
         }
 
         tagFiducials = tagResult.getFiducialResults();
 
         for (LLResultTypes.FiducialResult tag : tagFiducials) {
-            // keep the first tag of the frame as the opmode-wide angle
+            // first tag in the frame wins
             if (tagId < 0) {
                 tagId = tag.getFiducialId();
-                // 3d pose roll, needs the tag pose to be computed by the pipeline
+                // roll from the tag's 3D pose (pipeline has to output pose)
                 tagRoll = tag.getTargetPoseCameraSpace()
                         .getOrientation()
                         .getRoll(AngleUnit.DEGREES);
             }
         }
 
-        updateMechanismAngle();
+        updateHiveAngle();
     }
 
-    // reports the frame updateAprilTagState() read, nothing more
+    // prints the tags this frame read
     private void addAprilTagTelemetry() {
         if (tagResult == null) {
             telemetry.addData("Limelight", "no valid result");
@@ -211,7 +195,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             telemetry.addData("Limelight", "no tags in view");
         } else {
             for (LLResultTypes.FiducialResult tag : tagFiducials) {
-                //Telemetry for the roll of the april tag
+                // roll of each visible tag
                 String prefix = "Tag " + tag.getFiducialId() + " ";
                 telemetry.addData(prefix + "Roll(pose)", "%.1f deg",
                         tag.getTargetPoseCameraSpace()
@@ -223,22 +207,18 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             telemetry.addData("TagRoll", "%.1f deg (id %d)", tagRoll, tagId);
         }
 
-        if (Double.isNaN(mechanismAngle)) {
-            telemetry.addData("MechanismAngle", "no mechanism tag seen yet");
+        if (Double.isNaN(hiveAngle)) {
+            telemetry.addData("HiveAngle", "no hive tag seen yet");
         } else {
-            telemetry.addData("MechanismAngle", "%.1f deg (tag %d)", mechanismAngle, mechanismTagId);
+            telemetry.addData("HiveAngle", "%.1f deg (tag %d)", hiveAngle, hiveTagId);
         }
     }
 
-    // Picks the best visible mechanism tag and turns its roll into an angle.
-    // "Best" is the largest target area: a tag seen big and square is the most
-    // frontal one, so its pose-derived roll carries the least perspective error.
-    // Coplanar tags need no averaging for this to be right, and a tag clocked
-    // further round the mechanism carries its own mount offset instead.
-    private void updateMechanismAngle() {
+    // biggest hive tag in view, its roll becomes the hive angle
+    private void updateHiveAngle() {
         LLResultTypes.FiducialResult best = null;
         for (LLResultTypes.FiducialResult tag : tagFiducials) {
-            if (!isMechanismTag(tag.getFiducialId())) {
+            if (!isHiveTag(tag.getFiducialId())) {
                 continue;
             }
             if (best == null || tag.getTargetArea() > best.getTargetArea()) {
@@ -247,40 +227,51 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         }
 
         if (best == null) {
-            // no mechanism tag this frame: keep the last angle and filter state,
-            // a mechanism does not move because the camera lost sight of it
-            mechanismTagId = -1;
+            // no tag this frame: keep the last angle
+            hiveTagId = -1;
             return;
         }
 
-        mechanismTagId = best.getFiducialId();
-        mechanismRawDegrees = best.getTargetPoseCameraSpace()
+        hiveTagId = best.getFiducialId();
+        hiveRoll = best.getTargetPoseCameraSpace()
                 .getOrientation()
-                .getRoll(AngleUnit.DEGREES)
-                + mountOffsetFor(mechanismTagId);
+                .getRoll(AngleUnit.DEGREES);
 
-        double target = wrapDegrees(mechanismRawDegrees - mechanismZeroDegrees);
-        mechanismAngle = Double.isNaN(mechanismAngle)
+        double target = wrapDegrees(hiveRoll - hiveZeroDegrees);
+        hiveAngle = Double.isNaN(hiveAngle)
                 ? target  // first reading after start: no history to filter against
-                : wrapDegrees(mechanismAngle
-                        + MECHANISM_ANGLE_SMOOTHING * wrapDegrees(target - mechanismAngle));
+                : wrapDegrees(hiveAngle
+                        + HIVE_ANGLE_SMOOTHING * wrapDegrees(target - hiveAngle));
     }
 
-    // stores the current reading as the new zero, so the mechanism reads 0 here
-    private void rezeroMechanism() {
-        if (Double.isNaN(mechanismRawDegrees)) {
+    // current reading becomes the new zero
+    private void rezeroHive() {
+        if (Double.isNaN(hiveRoll)) {
             return;  // nothing seen yet, nothing to zero against
         }
-        mechanismZeroDegrees = mechanismRawDegrees;
-        mechanismAngle = 0;
+        hiveZeroDegrees = hiveRoll;
+        hiveAngle = 0;
     }
 
-    private boolean isMechanismTag(int fiducialId) {
-        // unconfigured: any tag in view is treated as a mechanism tag
-        if (MECHANISM_TAG_IDS.length == 0) {
+    private void updateCellUp() {
+        if (hiveTagId < 0) {
+            cellUp = false;
+            return;
+        }
+        double roll = Math.abs(wrapDegrees(hiveRoll));
+        if (roll < CELL_UP_DEGREES - CELL_UP_HYSTERESIS) {
+            cellUp = true;
+        } else if (roll > CELL_UP_DEGREES + CELL_UP_HYSTERESIS) {
+            cellUp = false;
+        }
+    }
+
+    private boolean isHiveTag(int fiducialId) {
+        // no IDs set: any tag counts
+        if (HIVE_TAG_IDS.length == 0) {
             return true;
         }
-        for (int id : MECHANISM_TAG_IDS) {
+        for (int id : HIVE_TAG_IDS) {
             if (id == fiducialId) {
                 return true;
             }
@@ -288,25 +279,12 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         return false;
     }
 
-    private static double mountOffsetFor(int fiducialId) {
-        for (int i = 0; i < MECHANISM_TAG_IDS.length; i++) {
-            if (MECHANISM_TAG_IDS[i] == fiducialId && i < MECHANISM_TAG_MOUNT_DEGREES.length) {
-                return MECHANISM_TAG_MOUNT_DEGREES[i];
-            }
-        }
-        return 0;
-    }
-
-    // keeps an angle in -180..180 so a wrap cannot lag the filter by a full turn
     private static double wrapDegrees(double degrees) {
         double wrapped = degrees % 360.0;
         if (wrapped > 180.0) {
             wrapped -= 360.0;
         } else if (wrapped <= -180.0) {
             wrapped += 360.0;
-        }
-        if (wrapped == 0.0) {
-            wrapped = 0.0;  // turns -0.0 into 0.0 so telemetry never prints "-0.0"
         }
         return wrapped;
     }

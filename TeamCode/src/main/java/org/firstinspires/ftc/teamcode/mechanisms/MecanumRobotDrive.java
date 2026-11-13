@@ -16,6 +16,7 @@ public class MecanumRobotDrive {
 
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private Servo CameraServo;
+    private Servo testLight; // goBILDA RGB indicator light, servo PWM
     private CRServo intakeServoLeft;
     private CRServo intakeServoRight;
     private IMU imu;
@@ -36,12 +37,16 @@ public class MecanumRobotDrive {
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
      CameraServo = hwMap.get(Servo.class, "camera_servo");
+     testLight = hwMap.get(Servo.class, "test_light");
      intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
      intakeServoRight = hwMap.get(CRServo.class, "intake_servo_right");
 
      // stop them til drive runs
      intakeServoLeft.setPower(0.0);
      intakeServoRight.setPower(0.0);
+
+     // light starts off
+     testLight.setPosition(0.0);
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -64,12 +69,7 @@ public class MecanumRobotDrive {
         ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
-    // Polarity of the drive. These were -1 while the chassis was mirrored left<->right
-    // (pure strafe and pure rotate came out backwards, forward stayed correct). That
-    // mirror was a hardware fault and is fixed, so both are back to +1: the standard
-    // mixing matrix below is now correct on its own. Flip a sign only if the left and
-    // right motor sides get swapped again - and check the stick layout in the opmode
-    // too, since a sign flip only makes sense paired with it.
+    // drive polarity, +1 normally. flip both if the left/right motors get swapped.
     private static final double STRAFE_SIGN = 1.0;
     private static final double ROTATE_SIGN = 1.0;
 
@@ -139,6 +139,11 @@ public class MecanumRobotDrive {
     // camera servo position
     public double cameraServoPos() {
         return CameraServo.getPosition();
+    }
+
+    // status light position 0 to 1, 0 = off
+    public void setTestLightPos(double pos) {
+        testLight.setPosition(Math.max(0.0, Math.min(1.0, pos)));
     }
 
     // left servo power
