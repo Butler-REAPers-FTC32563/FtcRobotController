@@ -7,7 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -16,7 +18,7 @@ public class MecanumRobotDrive {
 
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private Servo CameraServo;
-    private Servo testLight; // goBILDA RGB indicator light, servo PWM
+    private ServoImplEx testLight; // hive status light
     private CRServo intakeServoLeft;
     private CRServo intakeServoRight;
     private IMU imu;
@@ -37,7 +39,8 @@ public class MecanumRobotDrive {
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
      CameraServo = hwMap.get(Servo.class, "camera_servo");
-     testLight = hwMap.get(Servo.class, "test_light");
+     testLight = hwMap.get(ServoImplEx.class, "test_light");
+     testLight.setPwmRange(new PwmControl.PwmRange(500, 2500));
      intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
      intakeServoRight = hwMap.get(CRServo.class, "intake_servo_right");
 

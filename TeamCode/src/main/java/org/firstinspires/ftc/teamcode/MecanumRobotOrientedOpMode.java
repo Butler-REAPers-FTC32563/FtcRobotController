@@ -31,9 +31,16 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     private static final double CELL_UP_DEGREES = 90;
     private static final double CELL_UP_HYSTERESIS = 5;
 
-    // goBILDA light: 0 off, 0.5 is greenish
-    private static final double LIGHT_ON_POS = 0.5;
+    // roll a hive tag reads when its cell is right side up. the tags on the
+    // hive are not all mounted the same way, so measure it on the field: put a
+    // cell you know is up in front of the camera, read HiveRoll in telemetry,
+    // and put that number here. 0 = tags read 0 when up, which may be wrong.
+    private static final double HIVE_ROLL_WHEN_UP = 0;
+
+    // goBILDA light colours as servo positions, off the goBILDA chart
     private static final double LIGHT_OFF_POS = 0.0;
+    private static final double LIGHT_RED_POS = 0.279;
+    private static final double LIGHT_GREEN_POS = 0.5;
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
 
@@ -46,8 +53,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // intake on/off, toggled with A
     boolean intakeOn;
 
-    // true when the cell we are looking at can be scored
-    private boolean cellUp;
+    // whether the cell we are looking at can be scored, unknown until a hive
+    // tag is in view
+    private HiveCellState cellState = HiveCellState.UNKNOWN;
 
     // first tag in this frame's reading, set by updateAprilTagState().
     // tagId is -1 when no tag is in view.
@@ -131,9 +139,10 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             cameraServoPos = Math.max(0.0, cameraServoPos - SERVO_STEP);
         }
 
-        // light shows whether the cell we are looking at can be scored
-        updateCellUp();
-        drive.setTestLightPos(cellUp ? LIGHT_ON_POS : LIGHT_OFF_POS);
+        // light: red while the cell is up, green while it is down, off when we
+        // cannot tell
+        updateCellState();
+        drive.setTestLightPos(lightPosFor(cellState));
 
         drive.setCameraServoPos(cameraServoPos);
 
@@ -150,7 +159,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("CameraServoPos", drive.cameraServoPos());
         telemetry.addData("IntakeServoLeftPower", drive.intakeServoLeftPower());
         telemetry.addData("IntakeServoRightPower", drive.intakeServoRightPower());
-        telemetry.addData("CellUp", cellUp);
+        telemetry.addData("Hive", cellState);
 
         addAprilTagTelemetry();
 
@@ -212,6 +221,11 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         } else {
             telemetry.addData("HiveAngle", "%.1f deg (tag %d)", hiveAngle, hiveTagId);
         }
+        if (Double.isNaN(hiveRoll)) {
+            telemetry.addData("HiveRoll", "no hive tag seen yet");
+        } else {
+            telemetry.addData("HiveRoll", "%.1f deg (tag %d)", hiveRoll, hiveTagId);
+        }
     }
 
     // biggest hive tag in view, its roll becomes the hive angle
@@ -253,16 +267,35 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         hiveAngle = 0;
     }
 
-    private void updateCellUp() {
+    // up, down, or unknown while there is no hive tag to look at
+    private enum HiveCellState {
+        UP,
+        DOWN,
+        UNKNOWN
+    }
+
+    // red = cell up, green = cell down, off = we do not know
+    private static double lightPosFor(HiveCellState state) {
+        switch (state) {
+            case UP:
+                return LIGHT_RED_POS;
+            case DOWN:
+                return LIGHT_GREEN_POS;
+            default:
+                return LIGHT_OFF_POS;
+        }
+    }
+
+    private void updateCellState() {
         if (hiveTagId < 0) {
-            cellUp = false;
+            cellState = HiveCellState.UNKNOWN;
             return;
         }
-        double roll = Math.abs(wrapDegrees(hiveRoll));
+        double roll = Math.abs(wrapDegrees(hiveRoll - HIVE_ROLL_WHEN_UP));
         if (roll < CELL_UP_DEGREES - CELL_UP_HYSTERESIS) {
-            cellUp = true;
+            cellState = HiveCellState.UP;
         } else if (roll > CELL_UP_DEGREES + CELL_UP_HYSTERESIS) {
-            cellUp = false;
+            cellState = HiveCellState.DOWN;
         }
     }
 
