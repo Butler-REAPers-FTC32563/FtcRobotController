@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 import java.util.Collections;
 import java.util.List;
 
+
+//todo make a timer work in auto as an if statement so if auto time is ending go park
 @TeleOp
 public class MecanumRobotOrientedOpMode extends OpMode {
 
@@ -56,6 +58,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // whether the cell we are looking at can be scored, unknown until a hive
     // tag is in view
     private HiveCellState cellState = HiveCellState.UNKNOWN;
+    private int framesWithoutHiveTag = 0;
 
     // first tag in this frame's reading, set by updateAprilTagState().
     // tagId is -1 when no tag is in view.
@@ -111,14 +114,25 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     }
 
     @Override
+    public void stop() {
+        // The SDK already zeroes motors on a Driver Station STOP. This is about
+        // releasing the Limelight's polling thread and leaving the light off for
+        // the next run — start() recreates the poller when the opmode is reused.
+        if (limelight3A != null) {
+            limelight3A.stop();
+        }
+        drive.stopAll();
+    }
+
+    @Override
     public void loop() {
         // read the tags first so the rest of loop() uses this frame's values
         updateAprilTagState();
 
         // standard stick layout: left = forward/back + strafe, right = rotate
-        forward = -gamepad1.left_stick_y;
-        strafe = gamepad1.left_stick_x;
-        rotate = gamepad1.right_stick_x;
+        forward = deadzone(-gamepad1.left_stick_y);
+        strafe = deadzone(gamepad1.left_stick_x);
+        rotate = deadzone(gamepad1.right_stick_x);
 
         // A toggles the intake, servos follow
         if (gamepad1.aWasReleased()) {
@@ -146,7 +160,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
         drive.setCameraServoPos(cameraServoPos);
 
-        drive.drive(forward, strafe, rotate, intake);
+        drive.drive(forward, strafe, rotate);
+        drive.setIntake(intake);
 
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
@@ -260,8 +275,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     // current reading becomes the new zero
     private void rezeroHive() {
-        if (Double.isNaN(hiveRoll)) {
-            return;  // nothing seen yet, nothing to zero against
+        if (hiveTagId < 0) {
+            return;  // no hive tag in view, don't zero against a stale roll
         }
         hiveZeroDegrees = hiveRoll;
         hiveAngle = 0;
@@ -288,9 +303,15 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     private void updateCellState() {
         if (hiveTagId < 0) {
+            // hold the last reading briefly so one bad frame does not blink
+            // the light off and back on
+            if (++framesWithoutHiveTag < 5) {
+                return;
+            }
             cellState = HiveCellState.UNKNOWN;
             return;
         }
+        framesWithoutHiveTag = 0;
         double roll = Math.abs(wrapDegrees(hiveRoll - HIVE_ROLL_WHEN_UP));
         if (roll < CELL_UP_DEGREES - CELL_UP_HYSTERESIS) {
             cellState = HiveCellState.UP;
@@ -300,16 +321,21 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     }
 
     private boolean isHiveTag(int fiducialId) {
-        // no IDs set: any tag counts
-        if (HIVE_TAG_IDS.length == 0) {
-            return true;
-        }
         for (int id : HIVE_TAG_IDS) {
             if (id == fiducialId) {
                 return true;
             }
         }
         return false;
+    }
+
+    // ignore stick noise at center and smooth the rest back to full range
+    private static double deadzone(double value) {
+        double magnitude = Math.abs(value) - 0.05;
+        if (magnitude <= 0) {
+            return 0;
+        }
+        return Math.copySign(magnitude / 0.95, value);
     }
 
     private static double wrapDegrees(double degrees) {

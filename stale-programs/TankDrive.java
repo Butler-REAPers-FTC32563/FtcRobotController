@@ -1,6 +1,3 @@
-//TODO
-// Add a deadzone since controls are very sensitve
-
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
