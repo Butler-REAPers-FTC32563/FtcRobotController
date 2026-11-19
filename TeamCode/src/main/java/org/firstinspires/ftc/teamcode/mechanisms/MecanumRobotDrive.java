@@ -7,7 +7,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -16,6 +18,7 @@ public class MecanumRobotDrive {
 
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
     private Servo CameraServo;
+    private ServoImplEx testLight; // hive status light
     private CRServo intakeServoLeft;
     private CRServo intakeServoRight;
     private IMU imu;
@@ -36,12 +39,17 @@ public class MecanumRobotDrive {
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
      CameraServo = hwMap.get(Servo.class, "camera_servo");
+     testLight = hwMap.get(ServoImplEx.class, "test_light");
+     testLight.setPwmRange(new PwmControl.PwmRange(500, 2500));
      intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
      intakeServoRight = hwMap.get(CRServo.class, "intake_servo_right");
 
      // stop them til drive runs
      intakeServoLeft.setPower(0.0);
      intakeServoRight.setPower(0.0);
+
+     // light starts off
+     testLight.setPosition(0.0);
 
      backRightMotor.setDirection(DcMotor.Direction.REVERSE);
 
@@ -64,8 +72,15 @@ public class MecanumRobotDrive {
         ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
+    // drive polarity, +1 normally. flip both if the left/right motors get swapped.
+    private static final double STRAFE_SIGN = 1.0;
+    private static final double ROTATE_SIGN = 1.0;
+
     // -1 to 1 for forward/strafe/rotate, intake is just 0 or 1
     public void drive(double forward, double strafe, double rotate, double intake) {
+        strafe *= STRAFE_SIGN;
+        rotate *= ROTATE_SIGN;
+
         // combine the inputs for each wheel
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
@@ -127,6 +142,11 @@ public class MecanumRobotDrive {
     // camera servo position
     public double cameraServoPos() {
         return CameraServo.getPosition();
+    }
+
+    // status light position 0 to 1, 0 = off
+    public void setTestLightPos(double pos) {
+        testLight.setPosition(Math.max(0.0, Math.min(1.0, pos)));
     }
 
     // left servo power
