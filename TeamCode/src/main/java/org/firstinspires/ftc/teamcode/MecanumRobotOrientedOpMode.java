@@ -38,7 +38,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // and put that number here. 0 = tags read 0 when up, which may be wrong.
     private static final double HIVE_ROLL_WHEN_UP = 0;
 
-    // goBILDA light colours as servo positions, off the goBILDA chart
+    // goBILDA light colors as servo positions, off the goBILDA chart
     private static final double LIGHT_OFF_POS = 0.0;
     private static final double LIGHT_RED_POS = 0.350;
     private static final double LIGHT_GREEN_POS = 0.5;
