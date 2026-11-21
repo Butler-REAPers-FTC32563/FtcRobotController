@@ -29,11 +29,11 @@ public class PedroCode2 extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(56, 8, 90);
-    private final Pose path1 = poseFactory.of(19.75, 76.75, 90);
-    private final Pose point2 = poseFactory.of(46.75, 127.75, 90);
-    private final Pose point3 = poseFactory.of(64.75, 127.75, -90);
-    private final Pose point4 = poseFactory.of(64.75, 133.75, -90);
+    private final Pose start = poseFactory.of(60, 8.5, 90);
+    private final Pose path1 = poseFactory.of(26.6353, 33.8593, 90);
+    private final Pose point2 = poseFactory.of(26.3818, 103.4649, 90);
+    private final Pose point3 = poseFactory.of(61.75, 118.75, 90);
+    private final Pose point4 = poseFactory.of(61.75, 136.75, -90);
 
     // Autonomous routine
     public Command autoRoutine() {

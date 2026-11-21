@@ -16,7 +16,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name = "GTA VI", group = "Autonomous")
+@Autonomous(name = "Auto3", group = "Autonomous")
 public class Auto3 extends LinearOpMode {
 
     private Follower follower;
@@ -24,9 +24,9 @@ public class Auto3 extends LinearOpMode {
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(61.75, 133.75, -90);
-    private final Pose path1 = poseFactory.of(16.75, 79.75, 180);
-    private final Pose point2 = poseFactory.of(16.75, 46.75, 180);
-    private final Pose point3 = poseFactory.of(10.75, 46.75, 180);
+    private final Pose path1 = poseFactory.of(26, 90, -90);
+    private final Pose point2 = poseFactory.of(26, 47, -90);
+    private final Pose point3 = poseFactory.of(15, 47, 180);
     private final Pose point4 = poseFactory.of(52.75, 16.75, 180);
     private final Pose point5 = poseFactory.of(52.75, 7.75, 90);
 
@@ -69,7 +69,7 @@ public class Auto3 extends LinearOpMode {
     }
 
     public Path path1() {
-        return Paths.line(start, path1).linear(start, path1);
+        return Paths.line(start, path1).constant(path1);
     }
 
     public Path path2() {
@@ -88,4 +88,3 @@ public class Auto3 extends LinearOpMode {
         return Paths.line(point4, point5).reverseTangent();
     }
 }
-
