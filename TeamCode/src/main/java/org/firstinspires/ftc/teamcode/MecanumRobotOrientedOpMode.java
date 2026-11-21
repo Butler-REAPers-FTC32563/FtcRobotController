@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -8,7 +9,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +47,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     private static final double LIGHT_GREEN_POS = 0.5;
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
+
+    // odometry pods, same Pinpoint the autos use
+    private GoBildaPinpointDriver pinpoint;
 
     // joystick and intake inputs
     double forward, strafe, rotate, intake;
@@ -86,6 +92,23 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
         drive.init(hardwareMap);
 
+        // set the pods up the same way the autos do, so the numbers match
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, Constants.localizerConfig.name.get());
+        pinpoint.setOffsets(
+                Constants.localizerConfig.xPodOffset.get(),
+                Constants.localizerConfig.yPodOffset.get(),
+                Constants.localizerConfig.offsetUnits.get());
+        if (Constants.localizerConfig.ticksPerUnit.get().isPresent()) {
+            pinpoint.setEncoderResolution(
+                    Constants.localizerConfig.ticksPerUnit.get().getAsDouble(),
+                    Constants.localizerConfig.encoderResolutionUnit.get());
+        } else {
+            pinpoint.setEncoderResolution(Constants.localizerConfig.podType.get());
+        }
+        pinpoint.setEncoderDirections(
+                Constants.localizerConfig.xPodDirection.get(),
+                Constants.localizerConfig.yPodDirection.get());
+
         drive.setMaxRPM(MAX_RPM);
         drive.setIntakeServoDirection(INTAKE_SERVO_DIRECTION);
         drive.setCameraServoPos(cameraServoPos);
@@ -112,6 +135,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     public void loop() {
         // read the tags first so the rest of loop() uses this frame's values
         updateAprilTagState();
+
+        // refresh the odometry pods for this frame
+        pinpoint.update();
 
         // standard stick layout: left = forward/back + strafe, right = rotate
         forward = -gamepad1.left_stick_y;
@@ -149,6 +175,11 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.addData("FrontRight RPM", drive.frontRightRPM());
         telemetry.addData("BackLeft RPM", drive.backLeftRPM());
         telemetry.addData("BackRight RPM", drive.backRightRPM());
+        telemetry.addData("OdoPod X", "%d ticks", pinpoint.getEncoderX());
+        telemetry.addData("OdoPod Y", "%d ticks", pinpoint.getEncoderY());
+        telemetry.addData("Odo X", "%.2f in", pinpoint.getPosX(DistanceUnit.INCH));
+        telemetry.addData("Odo Y", "%.2f in", pinpoint.getPosY(DistanceUnit.INCH));
+        telemetry.addData("Odo Heading", "%.1f deg", pinpoint.getHeading(AngleUnit.DEGREES));
         telemetry.addData("IntakeOn", intakeOn);
         telemetry.addData("CameraServoPos", drive.cameraServoPos());
         telemetry.addData("IntakeServoLeftPower", drive.intakeServoLeftPower());
