@@ -80,7 +80,8 @@ public class LimeLightTest extends OpMode {
             if (!llResult.isValid()) {
                 rotate = ROTATE_SPEED;
             }
-            drive.drive(forward, strafe, rotate, intake);
+            drive.drive(forward, strafe, rotate);
+            drive.setIntake(intake);
 
             //update and add telemetry
             telemetry.update();

@@ -106,8 +106,6 @@ public class TestBench {
         telemetry.addData("Green", normGreen);
         telemetry.addData("Blue", normBlue);
 
-        // TODO Change colors for our needs
-
         /*
         red, green, blue
         RED = >.35, <.3, <.3

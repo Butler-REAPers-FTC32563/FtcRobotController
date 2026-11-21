@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.mechanisms.MecanumRobotDrive;
 import java.util.Collections;
 import java.util.List;
 
+
+//todo make a timer work in auto as an if statement so if auto time is ending go park
 @TeleOp
 public class MecanumRobotOrientedOpMode extends OpMode {
 
@@ -27,9 +29,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // camera servo change per dpad press
     private static final double SERVO_STEP = 0.04;
 
-    // a cell is scorable while its tags are this close to upright
-    private static final double CELL_UP_DEGREES = 90;
-    private static final double CELL_UP_HYSTERESIS = 5;
+    // field-measured: up reads <= 20 deg, down reads > 55 deg; split the difference
+    private static final double CELL_UP_CUTOFF_DEGREES = 37.5;
 
     // roll a hive tag reads when its cell is right side up. the tags on the
     // hive are not all mounted the same way, so measure it on the field: put a
@@ -37,9 +38,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // and put that number here. 0 = tags read 0 when up, which may be wrong.
     private static final double HIVE_ROLL_WHEN_UP = 0;
 
-    // goBILDA light colours as servo positions, off the goBILDA chart
+    // goBILDA light colors as servo positions, off the goBILDA chart
     private static final double LIGHT_OFF_POS = 0.0;
-    private static final double LIGHT_RED_POS = 0.279;
+    private static final double LIGHT_RED_POS = 0.350;
     private static final double LIGHT_GREEN_POS = 0.5;
 
     MecanumRobotDrive drive = new MecanumRobotDrive();
@@ -57,11 +58,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // tag is in view
     private HiveCellState cellState = HiveCellState.UNKNOWN;
 
-    // first tag in this frame's reading, set by updateAprilTagState().
-    // tagId is -1 when no tag is in view.
-    private int tagId = -1;
-    private double tagRoll;
-
     // Limelight result this frame's tags came from, reused by telemetry
     private LLResult tagResult;
     private List<LLResultTypes.FiducialResult> tagFiducials = Collections.emptyList();
@@ -75,18 +71,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             42, 43, 44, 45,
     };
 
-    // angle smoothing 0 to 1. 0 = raw, 1 = frozen.
-    private static final double HIVE_ANGLE_SMOOTHING = 0.25;
-
-    // degrees subtracted so a chosen position reads 0. Y sets a new zero.
-    private double hiveZeroDegrees;
-
-    // last hive angle, NaN until a tag has been seen
-    private double hiveAngle = Double.NaN;
-    // roll of the tag the angle came from, before zeroing. this is what says
-    // whether the cell is up.
+    // roll of the biggest hive tag in view. this is what says whether the cell is up.
     private double hiveRoll = Double.NaN;
-    // tag the angle came from, -1 if the last frame had none
+    // tag the roll came from, -1 if the last frame had none
     private int hiveTagId = -1;
 
     public Limelight3A limelight3A;
@@ -111,6 +98,17 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     }
 
     @Override
+    public void stop() {
+        // The SDK already zeroes motors on a Driver Station STOP. This is about
+        // releasing the Limelight's polling thread and leaving the light off for
+        // the next run — start() recreates the poller when the opmode is reused.
+        if (limelight3A != null) {
+            limelight3A.stop();
+        }
+        drive.stopAll();
+    }
+
+    @Override
     public void loop() {
         // read the tags first so the rest of loop() uses this frame's values
         updateAprilTagState();
@@ -125,11 +123,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             intakeOn = !intakeOn;
         }
         intake = intakeOn ? 1 : 0;
-
-        // Y sets the current position as the new zero
-        if (gamepad1.yWasPressed()) {
-            rezeroHive();
-        }
 
         // dpad moves the camera servo, kept in 0 to 1
         if (gamepad1.dpadUpWasPressed()) {
@@ -146,7 +139,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
         drive.setCameraServoPos(cameraServoPos);
 
-        drive.drive(forward, strafe, rotate, intake);
+        drive.drive(forward, strafe, rotate);
+        drive.setIntake(intake);
 
         telemetry.addData("Forward", forward);
         telemetry.addData("Strafe", strafe);
@@ -166,12 +160,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         telemetry.update();
     }
 
-    // reads the tags, updates tagId, tagRoll and the hive angle
+    // reads this frame's tags and updates the hive roll
     private void updateAprilTagState() {
-        // clear the old reading first so nothing stale survives this loop
-        tagId = -1;
-        tagRoll = 0;
-
         tagResult = limelight3A.getLatestResult();
         if (tagResult == null || !tagResult.isValid()) {
             tagResult = null;  // nothing valid this frame, telemetry says so below
@@ -181,19 +171,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         }
 
         tagFiducials = tagResult.getFiducialResults();
-
-        for (LLResultTypes.FiducialResult tag : tagFiducials) {
-            // first tag in the frame wins
-            if (tagId < 0) {
-                tagId = tag.getFiducialId();
-                // roll from the tag's 3D pose (pipeline has to output pose)
-                tagRoll = tag.getTargetPoseCameraSpace()
-                        .getOrientation()
-                        .getRoll(AngleUnit.DEGREES);
-            }
-        }
-
-        updateHiveAngle();
+        updateHiveRoll();
     }
 
     // prints the tags this frame read
@@ -213,14 +191,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
                 telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
                         tag.getTargetXDegrees(), tag.getTargetYDegrees());
             }
-            telemetry.addData("TagRoll", "%.1f deg (id %d)", tagRoll, tagId);
         }
 
-        if (Double.isNaN(hiveAngle)) {
-            telemetry.addData("HiveAngle", "no hive tag seen yet");
-        } else {
-            telemetry.addData("HiveAngle", "%.1f deg (tag %d)", hiveAngle, hiveTagId);
-        }
         if (Double.isNaN(hiveRoll)) {
             telemetry.addData("HiveRoll", "no hive tag seen yet");
         } else {
@@ -228,8 +200,8 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         }
     }
 
-    // biggest hive tag in view, its roll becomes the hive angle
-    private void updateHiveAngle() {
+    // biggest hive tag in view; its roll drives the cell state
+    private void updateHiveRoll() {
         LLResultTypes.FiducialResult best = null;
         for (LLResultTypes.FiducialResult tag : tagFiducials) {
             if (!isHiveTag(tag.getFiducialId())) {
@@ -241,8 +213,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         }
 
         if (best == null) {
-            // no tag this frame: keep the last angle
-            hiveTagId = -1;
+            hiveTagId = -1;  // no hive tag this frame
             return;
         }
 
@@ -250,21 +221,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         hiveRoll = best.getTargetPoseCameraSpace()
                 .getOrientation()
                 .getRoll(AngleUnit.DEGREES);
-
-        double target = wrapDegrees(hiveRoll - hiveZeroDegrees);
-        hiveAngle = Double.isNaN(hiveAngle)
-                ? target  // first reading after start: no history to filter against
-                : wrapDegrees(hiveAngle
-                        + HIVE_ANGLE_SMOOTHING * wrapDegrees(target - hiveAngle));
-    }
-
-    // current reading becomes the new zero
-    private void rezeroHive() {
-        if (Double.isNaN(hiveRoll)) {
-            return;  // nothing seen yet, nothing to zero against
-        }
-        hiveZeroDegrees = hiveRoll;
-        hiveAngle = 0;
     }
 
     // up, down, or unknown while there is no hive tag to look at
@@ -291,19 +247,11 @@ public class MecanumRobotOrientedOpMode extends OpMode {
             cellState = HiveCellState.UNKNOWN;
             return;
         }
-        double roll = Math.abs(wrapDegrees(hiveRoll - HIVE_ROLL_WHEN_UP));
-        if (roll < CELL_UP_DEGREES - CELL_UP_HYSTERESIS) {
-            cellState = HiveCellState.UP;
-        } else if (roll > CELL_UP_DEGREES + CELL_UP_HYSTERESIS) {
-            cellState = HiveCellState.DOWN;
-        }
+        double roll = Math.abs(AngleUnit.normalizeDegrees(hiveRoll - HIVE_ROLL_WHEN_UP));
+        cellState = roll < CELL_UP_CUTOFF_DEGREES ? HiveCellState.UP : HiveCellState.DOWN;
     }
 
     private boolean isHiveTag(int fiducialId) {
-        // no IDs set: any tag counts
-        if (HIVE_TAG_IDS.length == 0) {
-            return true;
-        }
         for (int id : HIVE_TAG_IDS) {
             if (id == fiducialId) {
                 return true;
@@ -312,13 +260,4 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         return false;
     }
 
-    private static double wrapDegrees(double degrees) {
-        double wrapped = degrees % 360.0;
-        if (wrapped > 180.0) {
-            wrapped -= 360.0;
-        } else if (wrapped <= -180.0) {
-            wrapped += 360.0;
-        }
-        return wrapped;
-    }
 }

@@ -17,19 +17,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class MecanumRobotDrive {
 
     private DcMotorEx frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, intakeMotor;
-    private Servo CameraServo;
+    private Servo cameraServo;
     private ServoImplEx testLight; // hive status light
     private CRServo intakeServoLeft;
     private CRServo intakeServoRight;
     private IMU imu;
-    private DcMotor motor; // linear slide motor, not currently used
     private double ticksPerRevFL;
     private double ticksPerRevFR;
     private double ticksPerRevBL;
     private double ticksPerRevBR;
 
-    // set from the opmode
-    private double maxRPM;
+    // Most opmodes should not have to remember to set this. 312 is the free
+    // speed of the drive motors; an opmode can still override it.
+    private static final double DEFAULT_MAX_RPM = 312;
+    private double maxRPM = DEFAULT_MAX_RPM;
 
     // grab all the hardware
     public void init(HardwareMap hwMap) {
@@ -38,7 +39,7 @@ public class MecanumRobotDrive {
      frontRightMotor = hwMap.get(DcMotorEx.class, "front_right_motor");
      backRightMotor = hwMap.get(DcMotorEx.class, "back_right_motor");
      intakeMotor = hwMap.get(DcMotorEx.class, "intake_motor");
-     CameraServo = hwMap.get(Servo.class, "camera_servo");
+     cameraServo = hwMap.get(Servo.class, "camera_servo");
      testLight = hwMap.get(ServoImplEx.class, "test_light");
      testLight.setPwmRange(new PwmControl.PwmRange(500, 2500));
      intakeServoLeft = hwMap.get(CRServo.class, "intake_servo_left");
@@ -72,22 +73,15 @@ public class MecanumRobotDrive {
         ticksPerRevBL = backLeftMotor.getMotorType().getTicksPerRev();
         ticksPerRevBR = backRightMotor.getMotorType().getTicksPerRev();
     }
-    // drive polarity, +1 normally. flip both if the left/right motors get swapped.
-    private static final double STRAFE_SIGN = 1.0;
-    private static final double ROTATE_SIGN = 1.0;
-
-    // -1 to 1 for forward/strafe/rotate, intake is just 0 or 1
-    public void drive(double forward, double strafe, double rotate, double intake) {
-        strafe *= STRAFE_SIGN;
-        rotate *= ROTATE_SIGN;
-
+    // -1 to 1 for forward/strafe/rotate
+    public void drive(double forward, double strafe, double rotate) {
         // combine the inputs for each wheel
         double frontLeftPower = forward + strafe + rotate;
         double backLeftPower = forward - strafe + rotate;
         double frontRightPower = forward - strafe - rotate;
         double backRightPower = forward + strafe - rotate;
 
-        double maxPower = 4;
+        double maxPower = 1;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
@@ -116,9 +110,11 @@ public class MecanumRobotDrive {
         backLeftMotor.setVelocity(backLeftVelocity);
         frontRightMotor.setVelocity(frontRightVelocity);
         backRightMotor.setVelocity(backRightVelocity);
-        intakeMotor.setPower(intake);
+    }
 
-        // intake servos follow the intake
+    // intake is its own mechanism now, so it can run without driving
+    public void setIntake(double intake) {
+        intakeMotor.setPower(intake);
         intakeServoLeft.setPower(intake);
         intakeServoRight.setPower(intake);
     }
@@ -136,12 +132,12 @@ public class MecanumRobotDrive {
 
     // keep in 0-1 or the sdk throws
     public void setCameraServoPos(double pos) {
-        CameraServo.setPosition(Math.max(0.0, Math.min(1.0, pos)));
+        cameraServo.setPosition(Math.max(0.0, Math.min(1.0, pos)));
     }
 
     // camera servo position
     public double cameraServoPos() {
-        return CameraServo.getPosition();
+        return cameraServo.getPosition();
     }
 
     // status light position 0 to 1, 0 = off
@@ -159,7 +155,7 @@ public class MecanumRobotDrive {
         return intakeServoRight.getPower();
     }
 
-    // field relative drive, no intake here
+    // field relative drive; intake is controlled separately
     public void driveFieldRelative(double forward, double strafe, double rotate) {
         double theta = Math.atan2(forward, strafe);
         double r = Math.hypot(strafe, forward);
@@ -170,26 +166,9 @@ public class MecanumRobotDrive {
         double newForward = r * Math.sin(theta);
         double newStrafe = r * Math.cos(theta);
 
-        this.drive(newForward, newStrafe, rotate, 0);
+        this.drive(newForward, newStrafe, rotate);
 
     }
-    // wheel revs since reset
-    public double frontLeftMotor() {
-        return frontLeftMotor.getCurrentPosition() / ticksPerRevFL;
-    }
-
-    public double frontRightMotor() {
-        return frontRightMotor.getCurrentPosition() / ticksPerRevFR;
-    }
-
-    public double backLeftMotor() {
-        return backLeftMotor.getCurrentPosition() / ticksPerRevBL;
-    }
-
-    public double backRightMotor() {
-        return backRightMotor.getCurrentPosition() / ticksPerRevBR;
-    }
-
     // wheel rpm
     public double frontLeftRPM() {
         return (frontLeftMotor.getVelocity() / ticksPerRevFL) * 60;
@@ -205,5 +184,19 @@ public class MecanumRobotDrive {
 
     public double backRightRPM() {
         return (backRightMotor.getVelocity() / ticksPerRevBR) * 60;
+    }
+
+    // Stop everything this wrapper owns. The SDK already powers motors down on a
+    // Driver Station STOP, but this leaves a clean state for the next init() of
+    // these same hardware objects (the light and intake stay where we set them).
+    public void stopAll() {
+        if (frontLeftMotor != null) frontLeftMotor.setVelocity(0);
+        if (backLeftMotor != null) backLeftMotor.setVelocity(0);
+        if (frontRightMotor != null) frontRightMotor.setVelocity(0);
+        if (backRightMotor != null) backRightMotor.setVelocity(0);
+        if (intakeMotor != null) intakeMotor.setPower(0);
+        if (intakeServoLeft != null) intakeServoLeft.setPower(0);
+        if (intakeServoRight != null) intakeServoRight.setPower(0);
+        if (testLight != null) testLight.setPosition(0.0);
     }
 }
