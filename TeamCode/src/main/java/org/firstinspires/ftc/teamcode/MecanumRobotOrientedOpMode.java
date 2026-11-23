@@ -29,6 +29,9 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // camera servo change per dpad press
     private static final double SERVO_STEP = 0.04;
 
+    private static final int APRILTAG_PIPELINE = 2;
+    private static final long MAX_TAG_RESULT_AGE_MS = 250;
+
     // field-measured: up reads <= 20 deg, down reads > 55 deg; split the difference
     private static final double CELL_UP_CUTOFF_DEGREES = 37.5;
 
@@ -58,8 +61,7 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     // tag is in view
     private HiveCellState cellState = HiveCellState.UNKNOWN;
 
-    // Limelight result this frame's tags came from, reused by telemetry
-    private LLResult tagResult;
+    // Tags from the accepted result, reused by telemetry
     private List<LLResultTypes.FiducialResult> tagFiducials = Collections.emptyList();
 
     // hive tags, 4 per cell: 30-33 red scoring, 34-37 red audience,
@@ -82,7 +84,10 @@ public class MecanumRobotOrientedOpMode extends OpMode {
     public void init() {
         // setup limelight and pipeline
         limelight3A = hardwareMap.get(Limelight3A.class, "limeLight");
-        limelight3A.pipelineSwitch(2); // AprilTag pipeline, check the number in the Limelight UI
+        if (!limelight3A.pipelineSwitch(APRILTAG_PIPELINE)) {
+            telemetry.log().add("Limelight failed to switch to AprilTag pipeline %d", APRILTAG_PIPELINE);
+            telemetry.update();
+        }
 
         drive.init(hardwareMap);
 
@@ -162,39 +167,50 @@ public class MecanumRobotOrientedOpMode extends OpMode {
 
     // reads this frame's tags and updates the hive roll
     private void updateAprilTagState() {
-        tagResult = limelight3A.getLatestResult();
-        if (tagResult == null || !tagResult.isValid()) {
-            tagResult = null;  // nothing valid this frame, telemetry says so below
-            tagFiducials = Collections.emptyList();
-            hiveTagId = -1;
+        hiveTagId = -1;
+        hiveRoll = Double.NaN;
+        tagFiducials = Collections.emptyList();
+        LLResult tagResult = limelight3A.getLatestResult();
+        if (tagResult == null) {
+            telemetry.addData("Limelight", "no result");
+            return;
+        }
+        long resultAgeMs = tagResult.getStaleness();
+        if (resultAgeMs > MAX_TAG_RESULT_AGE_MS) {
+            telemetry.addData("Limelight", "stale result (%d ms)", resultAgeMs);
+            return;
+        }
+        int pipeline = tagResult.getPipelineIndex();
+        if (pipeline != APRILTAG_PIPELINE) {
+            telemetry.addData("Limelight", "pipeline %d, expected %d", pipeline, APRILTAG_PIPELINE);
+            return;
+        }
+        if (!tagResult.isValid()) {
+            telemetry.addData("Limelight", "no valid result");
             return;
         }
 
         tagFiducials = tagResult.getFiducialResults();
+        if (tagFiducials.isEmpty()) {
+            telemetry.addData("Limelight", "no tags in view");
+        }
         updateHiveRoll();
     }
 
     // prints the tags this frame read
     private void addAprilTagTelemetry() {
-        if (tagResult == null) {
-            telemetry.addData("Limelight", "no valid result");
-        } else if (tagFiducials.isEmpty()) {
-            telemetry.addData("Limelight", "no tags in view");
-        } else {
-            for (LLResultTypes.FiducialResult tag : tagFiducials) {
-                // roll of each visible tag
-                String prefix = "Tag " + tag.getFiducialId() + " ";
-                telemetry.addData(prefix + "Roll(pose)", "%.1f deg",
-                        tag.getTargetPoseCameraSpace()
-                                .getOrientation()
-                                .getRoll(AngleUnit.DEGREES));
-                telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
-                        tag.getTargetXDegrees(), tag.getTargetYDegrees());
-            }
+        for (LLResultTypes.FiducialResult tag : tagFiducials) {
+            String prefix = "Tag " + tag.getFiducialId() + " ";
+            telemetry.addData(prefix + "Roll(pose)", "%.1f deg",
+                    tag.getTargetPoseCameraSpace()
+                            .getOrientation()
+                            .getRoll(AngleUnit.DEGREES));
+            telemetry.addData(prefix + "TX/TY", "%.1f / %.1f deg",
+                    tag.getTargetXDegrees(), tag.getTargetYDegrees());
         }
 
         if (Double.isNaN(hiveRoll)) {
-            telemetry.addData("HiveRoll", "no hive tag seen yet");
+            telemetry.addData("HiveRoll", "no hive tag in view");
         } else {
             telemetry.addData("HiveRoll", "%.1f deg (tag %d)", hiveRoll, hiveTagId);
         }
@@ -213,7 +229,6 @@ public class MecanumRobotOrientedOpMode extends OpMode {
         }
 
         if (best == null) {
-            hiveTagId = -1;  // no hive tag this frame
             return;
         }
 
