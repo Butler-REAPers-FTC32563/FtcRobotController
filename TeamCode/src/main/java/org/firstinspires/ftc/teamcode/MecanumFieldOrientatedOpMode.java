@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -36,4 +39,8 @@ public class MecanumFieldOrientatedOpMode extends OpMode {
 
         telemetry.update();
     }
+}public static void start(Context context) {
+    Intent starter = new Intent(context, MecanumFieldOrientatedOpMode.class);
+    starter.putExtra();
+    context.startActivity(starter);
 }
