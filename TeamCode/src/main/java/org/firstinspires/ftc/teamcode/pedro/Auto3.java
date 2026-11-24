@@ -23,12 +23,13 @@ public class Auto3 extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(61.75, 133.75, -90);
-    private final Pose path1 = poseFactory.of(26, 90, -90);
-    private final Pose point2 = poseFactory.of(26, 47, -90);
-    private final Pose point3 = poseFactory.of(15, 47, 180);
-    private final Pose point4 = poseFactory.of(52.75, 16.75, 180);
-    private final Pose point5 = poseFactory.of(52.75, 7.75, 90);
+    private final Pose start = poseFactory.of(61, 133, -90);
+    private final Pose path1 = poseFactory.of(61.75, 130.75, -90);
+    private final Pose point2 = poseFactory.of(20, 83, -90);
+    private final Pose point3 = poseFactory.of(20, 47, 180);
+    private final Pose point4 = poseFactory.of(11, 47, 180);
+    private final Pose point5 = poseFactory.of(53, 17, 180);
+    private final Pose point6 = poseFactory.of(53, 8, 90);
 
     // Autonomous routine
     public Command autoRoutine() {
@@ -37,7 +38,8 @@ public class Auto3 extends LinearOpMode {
                 follow(follower, path2()),
                 follow(follower, path3()),
                 follow(follower, path4()),
-                follow(follower, path5())
+                follow(follower, path5()),
+                follow(follower, path6())
         );
     }
 
@@ -81,10 +83,14 @@ public class Auto3 extends LinearOpMode {
     }
 
     public Path path4() {
-        return Paths.line(point3, point4).constant(point4);
+        return Paths.line(point3, point4).tangent();
     }
 
     public Path path5() {
-        return Paths.line(point4, point5).reverseTangent();
+        return Paths.line(point4, point5).constant(point5);
+    }
+
+    public Path path6() {
+        return Paths.line(point5, point6).constant(point6);
     }
 }

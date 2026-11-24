@@ -21,8 +21,8 @@ public class LineTst extends LinearOpMode {
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
-    private final Pose start = poseFactory.of(58.75, 10.75, 90);
-    private final Pose path1 = poseFactory.of(58, 34, 90);
+    private final Pose start = poseFactory.of(124, 35, 90);
+    private final Pose path1 = poseFactory.of(28, 35, 90);
 
     // Autonomous routine
     public Command autoRoutine() {
